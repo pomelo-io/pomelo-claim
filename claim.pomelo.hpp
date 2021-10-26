@@ -21,7 +21,7 @@ public:
      *
      * - `{name} status` - contract status - ok/disabled
      * - `{name} pomelo_app` - Pomelo contract account (app.pomelo)
-     * - `{name} pomelo_vault` - Pomelo vault account where transfers come from (vault.pomelo)
+     * - `{name} pomelo_match` - Pomelo vault account where transfers come from (match.pomelo)
      *
      * ### example
      *
@@ -29,14 +29,14 @@ public:
      * {
      *     "status": "ok",
      *     "pomelo_app": "app.pomelo",
-     *     "pomelo_vault": "vault.pomelo",
+     *     "pomelo_match": "match.pomelo",
      * }
      * ```
      */
     struct [[eosio::table("config")]] config_row {
         name    status;
         name    pomelo_app;
-        name    pomelo_vault;
+        name    pomelo_match;
     };
     typedef eosio::singleton< "config"_n, config_row > config_table;
 
@@ -88,7 +88,7 @@ public:
      * ### example
      *
      * ```bash
-     * $ cleos push action claim.pomelo setconfig '{"config":{"status": "ok", "pomelo_app": "app.pomelo", "pomelo_vault": "vault.pomelo"}}' -p claim.pomelo
+     * $ cleos push action claim.pomelo setconfig '{"config":{"status": "ok", "pomelo_app": "app.pomelo", "pomelo_match": "match.pomelo"}}' -p claim.pomelo
      * ```
      */
     [[eosio::action]]

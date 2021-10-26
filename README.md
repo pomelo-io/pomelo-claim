@@ -6,14 +6,14 @@
 
 ```bash
 # configure app
-cleos push action claim.pomelo setconfig '{"config":["ok", "app.pomelo", "vault.pomelo"]}' -p claim.pomelo
+cleos push action claim.pomelo setconfig '{"config":["ok", "app.pomelo", "match.pomelo"]}' -p claim.pomelo
 
 # transfer matching pool tokens from the vault
-cleos transfer vault.pomelo claim.pomelo "1000.0000 EOS" "grant:grant1"
-cleos transfer vault.pomelo claim.pomelo "1000.0000 USDT" "grant:grant1" --contract tethertether
+cleos transfer match.pomelo claim.pomelo "1000.0000 EOS" "grant:grant1"
+cleos transfer match.pomelo claim.pomelo "1000.0000 USDT" "grant:grant1" --contract tethertether
 
 # disable claims
-cleos push action claim.pomelo setconfig '{"config":["disabled", "app.pomelo", "vault.pomelo"]}' -p claim.pomelo
+cleos push action claim.pomelo setconfig '{"config":["disabled", "app.pomelo", "match.pomelo"]}' -p claim.pomelo
 ```
 
 ### `@user`
@@ -48,7 +48,7 @@ $ ./scripts/test.sh
 
 - `{name} status` - contract status `ok`/`disabled`
 - `{name} pomelo_app` - Pomelo app account
-- `{name} pomelo_vault` - Pomelo vault account
+- `{name} pomelo_match` - Pomelo vault account
 
 ### example
 
@@ -56,7 +56,7 @@ $ ./scripts/test.sh
 {
     "status": "ok",
     "pomelo_app": "app.pomelo",
-    "pomelo_vault": "vault.pomelo"
+    "pomelo_match": "match.pomelo"
 }
 ```
 
@@ -101,7 +101,7 @@ Set contract configuration
 ### example
 
 ```bash
-$ cleos push action claim.pomelo setconfig '{"config":["ok", "app.pomelo", "vault.pomelo"]}' -p claim.pomelo
+$ cleos push action claim.pomelo setconfig '{"config":["ok", "app.pomelo", "match.pomelo"]}' -p claim.pomelo
 $ cleos push action claim.pomelo setconfig '{"config":null}' -p claim.pomelo
 ```
 
@@ -131,5 +131,5 @@ After the transfer funds become claimable by the corresponding `funding_account`
 ### example
 
 ```bash
-$ cleos transfer vault.pomelo claim.pomelo "10000 EOS" "grant:grant1" -p vault.pomelo
+$ cleos transfer match.pomelo claim.pomelo "10000 EOS" "grant:grant1" -p match.pomelo
 ```

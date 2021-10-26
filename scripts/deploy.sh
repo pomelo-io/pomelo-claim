@@ -5,7 +5,7 @@ cleos wallet unlock --password $(cat ~/eosio-wallet/.pass)
 
 # create account
 cleos create account eosio claim.pomelo EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
-cleos create account eosio vault.pomelo EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+cleos create account eosio match.pomelo EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 cleos create account eosio app.pomelo EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 cleos create account eosio fee.pomelo EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 cleos create account eosio eosn EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
@@ -38,8 +38,8 @@ cleos push action tethertether create '["eosio", "100000000.0000 USDT"]' -p teth
 cleos push action tethertether issue '["eosio", "10000000.0000 USDT", "init"]' -p eosio
 
 # transfer tokens
-cleos transfer eosio vault.pomelo "1000000.0000 EOS" ""
-cleos transfer eosio vault.pomelo "1000000.0000 USDT" "" --contract tethertether
+cleos transfer eosio match.pomelo "1000000.0000 EOS" ""
+cleos transfer eosio match.pomelo "1000000.0000 USDT" "" --contract tethertether
 
 # set price in oracle contract
 cleos push action oracle.defi setprice '[1, ["4,EOS", "eosio.token"], 4, 50000]' -p oracle.defi

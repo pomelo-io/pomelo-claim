@@ -18,7 +18,7 @@ void claimpomelo::setconfig( const optional<config_row> config )
         return;
     }
     check( is_account(config->pomelo_app), "claim.pomelo: invalid pomelo app account");
-    check( is_account(config->pomelo_vault), "claim.pomelo: invalid pomelo vault account");
+    check( is_account(config->pomelo_match), "claim.pomelo: invalid pomelo vault account");
 
     config_.set(*config, get_self());
 }
@@ -67,7 +67,7 @@ void claimpomelo::on_transfer( const name from, const name to, const asset quant
 
     const auto config = _config.get();
     if( from == get_self() || from == "eosio.ram"_n) return;
-    check( from == config.pomelo_vault, "claim.pomelo::on_transfer: only transfers from pomelo vault allowed");
+    check( from == config.pomelo_match, "claim.pomelo::on_transfer: only transfers from pomelo vault allowed");
 
     // parse memo
     const auto memo_parts = sx::utils::split(memo, ":");
