@@ -13,11 +13,7 @@ public:
     using contract::contract;
 
     claimpomelo(name rec, name code, datastream<const char*> ds)
-      : contract(rec, code, ds)
-      , _config(get_self(), get_self().value)
-    {
-        check( _config.exists(), "claim.pomelo: no config" );
-    };
+      : contract(rec, code, ds) {};
 
 
     /**
@@ -92,7 +88,7 @@ public:
      * ### example
      *
      * ```bash
-     * $ cleos push action claim.pomelo setconfig '{"status": "ok", "pomelo_account": "app.pomelo"}' -p claim.pomelo
+     * $ cleos push action claim.pomelo setconfig '{"config":{"status": "ok", "pomelo_app": "app.pomelo", "pomelo_vault": "vault.pomelo"}}' -p claim.pomelo
      * ```
      */
     [[eosio::action]]
@@ -134,8 +130,6 @@ public:
     void on_transfer( const name from, const name to, const asset quantity, const string memo );
 
 private:
-    config_table _config;
-
     void add_tokens( const name project_id, const name funding_account, const extended_asset ext_quantity);
 
     void transfer( const name to, const extended_asset value, const string memo );

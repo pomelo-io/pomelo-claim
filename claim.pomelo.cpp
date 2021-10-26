@@ -5,7 +5,6 @@
 #include "claim.pomelo.hpp"
 
 
-
 static const string CLAIM_INVALID_MEMO = "claim.pomelo::on_transfer: invalid memo";
 
 [[eosio::action]]
@@ -29,6 +28,7 @@ void claimpomelo::setconfig( const optional<config_row> config )
 void claimpomelo::claim( const name account )
 {
     require_auth( account );
+    config_table _config(get_self(), get_self().value);
     check( _config.exists() && _config.get().status == "ok"_n, "claim.pomelo::on_transfer: contract is under maintenance");
 
     claims_table claims( get_self(), get_self().value );
@@ -38,18 +38,21 @@ void claimpomelo::claim( const name account )
     for( auto itr = index.find( account.value ); itr != index.end() && itr->funding_account == account; ){
         for(const auto token: itr->tokens){
             transfer( account, token, "🍈 " + itr->project_id.to_string() + " claimed" );
+            claimed = true;
         }
         itr = index.erase( itr );
     }
-
     check( claimed, "claim.pomelo::claim: nothing to claim");
 }
 
 
-void claimpomelo::transfer( const name to, const extended_asset value, const string memo )
+void claimpomelo::transfer( const name to, const extended_asset tokens, const string memo )
 {
-    eosio::token::transfer_action transfer( value.contract, { get_self(), "active"_n });
-    transfer.send( get_self(), to, value.quantity, memo );
+    const auto balance = sx::utils::get_balance(tokens.get_extended_symbol(), get_self()).quantity;
+    check( balance >= tokens.quantity, "claimpomelo::transfer: not enough balance to transfer");
+
+    eosio::token::transfer_action transfer( tokens.contract, { get_self(), "active"_n });
+    transfer.send( get_self(), to, tokens.quantity, memo );
 }
 
 
@@ -58,6 +61,9 @@ void claimpomelo::on_transfer( const name from, const name to, const asset quant
 {
     // authenticate incoming `from` account
     require_auth( from );
+
+    config_table _config(get_self(), get_self().value);
+    check( _config.exists(), "claimpomelo::on_transfer: config not set");
 
     const auto config = _config.get();
     if( from == get_self() || from == "eosio.ram"_n) return;

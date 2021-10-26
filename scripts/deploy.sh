@@ -22,10 +22,11 @@ cleos set contract eosio.token ./include/eosio.token eosio.token.wasm eosio.toke
 cleos set contract tethertether ./include/eosio.token eosio.token.wasm eosio.token.abi
 cleos set contract login.eosn ./include/eosn.login login.eosn.wasm login.eosn.abi
 cleos set contract oracle.defi ./include/oracle.defi oracle.defi.wasm oracle.defi.abi
-cleos set contract app.pomelo . ./include/pomelo.app app.pomelo.wasm app.pomelo.abi
+cleos set contract app.pomelo ./include/pomelo.app app.pomelo.wasm app.pomelo.abi
 cleos set contract claim.pomelo . claim.pomelo.wasm claim.pomelo.abi
 
 # @eosio.code permission
+cleos set account permission claim.pomelo active --add-code
 cleos set account permission app.pomelo active --add-code
 cleos set account permission login.eosn active --add-code
 cleos set account permission eosn active login.eosn --add-code
