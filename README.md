@@ -42,6 +42,7 @@ $ ./scripts/test.sh
 - [TABLE `claims`](#table-claims)
 - [ACTION `setconfig`](#action-setconfig)
 - [ACTION `claim`](#action-claim)
+- [NOTIFIER `on_transfer`](#notifier-on_transfer)
 
 ## SINGLETON `config`
 
@@ -91,11 +92,11 @@ $ ./scripts/test.sh
 
 - **authority**: `get_self()`
 
-Set contract config
+Set contract configuration
 
 ### params
 
-- `{optional<claims_row>} config` - configuration (reset if null)
+- `{optional<config_row>} config` - configuration (reset if null)
 
 ### example
 
@@ -118,4 +119,17 @@ Claim funds
 
 ```bash
 $ cleos push action claim.pomelo claim '["prjaccount"]' -p prjaccount
+```
+
+## NOTIFIER `on_transfer`
+
+Transfer funds for a claim.
+Only transfers from Pomelo vault are accepted with the following memo format:
+`grant:{grant_id}` or `bounty:{bounty_id}`.
+After the transfer funds become claimable by the corresponding `funding_account` from Pomelo `bounties` or `grants` table
+
+### example
+
+```bash
+$ cleos transfer vault.pomelo claim.pomelo "10000 EOS" "grant:grant1" -p vault.pomelo
 ```
