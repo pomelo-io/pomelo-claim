@@ -57,7 +57,7 @@ public:
      * {
      *      "project_id": "grant1",
      *      "funding_account": "prjman1",
-     *      "tokens": ["1000.0000 EOS@eosio.token", "1000.0000 USDT@tethertether"]
+     *      "tokens": ["1000.0000 EOS@eosio.token", "1000.0000 USDT@tethertether"],
      *      "updated_at": "2021-12-06T00:00:00"
      * }
      * ```
