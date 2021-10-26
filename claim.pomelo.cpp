@@ -18,7 +18,8 @@ void claimpomelo::setconfig( const optional<config_row> config )
         config_.remove();
         return;
     }
-    check( is_account(config->pomelo_account), "claim.pomelo: invalid pomelo account");
+    check( is_account(config->pomelo_app), "claim.pomelo: invalid pomelo app account");
+    check( is_account(config->pomelo_vault), "claim.pomelo: invalid pomelo vault account");
 
     config_.set(*config, get_self());
 }
@@ -58,8 +59,9 @@ void claimpomelo::on_transfer( const name from, const name to, const asset quant
     // authenticate incoming `from` account
     require_auth( from );
 
+    const auto config = _config.get();
     if( from == get_self() || from == "eosio.ram"_n) return;
-    check( from == _config.get().pomelo_account, "claim.pomelo::on_transfer: only transfers from pomelo account allowed");
+    check( from == config.pomelo_vault, "claim.pomelo::on_transfer: only transfers from pomelo vault allowed");
 
     // parse memo
     const auto memo_parts = sx::utils::split(memo, ":");
@@ -71,11 +73,11 @@ void claimpomelo::on_transfer( const name from, const name to, const asset quant
 
     name funding_account;
     if (project_type == "grant"_n) {
-        pomelo::grants_table grants( get_self(), get_self().value );
+        pomelo::grants_table grants( config.pomelo_app, config.pomelo_app.value );
         funding_account = grants.get(project_id.value, "claim.pomelo::on_transfer: grant not found").funding_account;
     }
     else if (project_type == "bounty"_n) {
-        pomelo::bounties_table bounties( get_self(), get_self().value );
+        pomelo::bounties_table bounties( config.pomelo_app, config.pomelo_app.value );
         funding_account = bounties.get(project_id.value, "claim.pomelo::on_transfer: bounty not found").funding_account;
     }
     else check( false, CLAIM_INVALID_MEMO);

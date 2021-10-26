@@ -20,7 +20,7 @@ if [ ! -f "./include/oracle.defi/oracle.defi.wasm" ]; then
     blanc++ ./include/oracle.defi/oracle.defi.cpp -I include -o include/oracle.defi/oracle.defi.wasm --no-missing-ricardian-clause
 fi
 
-if [ ! -f "./include/pomelo.play/play.pomelo.wasm" ]; then
-    blanc++ ./include/pomelo.play/play.pomelo.cpp -I include -o include/pomelo.play/play.pomelo.wasm --no-missing-ricardian-clause
+if [ ! -f "./include/pomelo.app/app.pomelo.wasm" ]; then
+    blanc++ ./include/pomelo.app/app.pomelo.cpp -I include -o include/pomelo.app/app.pomelo.wasm --no-missing-ricardian-clause
 fi
 

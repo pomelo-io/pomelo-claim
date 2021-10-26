@@ -16,7 +16,7 @@ public:
       : contract(rec, code, ds)
       , _config(get_self(), get_self().value)
     {
-        check( _config.exists(), "claim.pomelo: config not set" );
+        check( _config.exists(), "claim.pomelo: no config" );
     };
 
 
@@ -24,20 +24,23 @@ public:
      * ## TABLE `config`
      *
      * - `{name} status` - contract status - ok/disabled
-     * - `{name} pomelo_account` - Pomelo contract account (app.pomelo)
+     * - `{name} pomelo_app` - Pomelo contract account (app.pomelo)
+     * - `{name} pomelo_vault` - Pomelo vault account where transfers come from (vault.pomelo)
      *
      * ### example
      *
      * ```json
      * {
      *     "status": "ok",
-     *     "pomelo_account": "app.pomelo",
+     *     "pomelo_app": "app.pomelo",
+     *     "pomelo_vault": "vault.pomelo",
      * }
      * ```
      */
     struct [[eosio::table("config")]] config_row {
         name    status;
-        name    pomelo_account;
+        name    pomelo_app;
+        name    pomelo_vault;
     };
     typedef eosio::singleton< "config"_n, config_row > config_table;
 
