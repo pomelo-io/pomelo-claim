@@ -102,7 +102,7 @@ public:
      *
      * ### params
      *
-     * - `{name} account` - grant funding account
+     * - `{name} account` - funding account elibigle for the matching prize claim
      *
      * ### example
      *
@@ -120,7 +120,7 @@ public:
      *
      * ### params
      *
-     * - `{name} from` - from EOS account (donation sender)
+     * - `{name} from` - from EOS account
      * - `{name} to` - to EOS account (process only incoming)
      * - `{asset} quantity` - quantity received
      * - `{string} memo` - transfer memo, i.e. "grant:myproject"
@@ -128,6 +128,24 @@ public:
      */
     [[eosio::on_notify("*::transfer")]]
     void on_transfer( const name from, const name to, const asset quantity, const string memo );
+
+
+    /**
+     * ## ACTION `claimlog`
+     *
+     * Log claim
+     *
+     * ### params
+     *
+     * - `{name} account` - account that claimed funds
+     * - `{name} project` - project id associated with the claim
+     * - `{vector<asset> claimed} - claimed funds
+     *
+     * ```
+     */
+    [[eosio::action]]
+    void claimlog( const name account, const name project, vector<asset> claimed );
+    using claimlog_action = eosio::action_wrapper<"claimlog"_n, &claimpomelo::claimlog>;
 
 private:
     void add_tokens( const name project_id, const name funding_account, const extended_asset ext_quantity);

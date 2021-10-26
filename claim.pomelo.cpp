@@ -33,16 +33,27 @@ void claimpomelo::claim( const name account )
 
     claims_table claims( get_self(), get_self().value );
     auto index = claims.get_index<"byfundingacc"_n>();
-    bool claimed = false;
+    bool success = false;
+    claimlog_action claim_log( get_self(), { get_self(), "active"_n });
 
     for( auto itr = index.find( account.value ); itr != index.end() && itr->funding_account == account; ){
+        vector<asset> claimed;
         for(const auto token: itr->tokens){
             transfer( account, token, "🍈 " + itr->project_id.to_string() + " matching prize received via Pomelo.io" );
-            claimed = true;
+            claimed.push_back(token.quantity);
+            success = true;
         }
+        claim_log.send( account, itr->project_id, claimed );
         itr = index.erase( itr );
     }
-    check( claimed, "claim.pomelo::claim: nothing to claim");
+    check( success, "claim.pomelo::claim: nothing to claim");
+}
+
+[[eosio::action]]
+void claimpomelo::claimlog( const name account, const name project, vector<asset> claimed )
+{
+    require_auth( get_self() );
+
 }
 
 

@@ -42,6 +42,7 @@ $ ./scripts/test.sh
 - [TABLE `claims`](#table-claims)
 - [ACTION `setconfig`](#action-setconfig)
 - [ACTION `claim`](#action-claim)
+- [ACTION `claimlog`](#action-claimlog)
 - [NOTIFIER `on_transfer`](#notifier-on_transfer)
 
 ## SINGLETON `config`
@@ -113,13 +114,25 @@ Claim funds
 
 ### params
 
-- `{name} account` - account funds belong to
+- `{name} account` - account making the claim
 
 ### example
 
 ```bash
 $ cleos push action claim.pomelo claim '["prjaccount"]' -p prjaccount
 ```
+
+## ACTION `claimlog`
+
+- **authority**: `get_self()`
+
+Log claim action
+
+### params
+
+- `{name} account` - account that claimed funds
+- `{name} project` - project id associated with the claim
+- `{vector<asset> claimed}` - claimed funds
 
 ## NOTIFIER `on_transfer`
 
