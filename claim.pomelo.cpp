@@ -37,7 +37,7 @@ void claimpomelo::claim( const name account )
 
     for( auto itr = index.find( account.value ); itr != index.end() && itr->funding_account == account; ){
         for(const auto token: itr->tokens){
-            transfer( account, token, "🍈 " + itr->project_id.to_string() + " claimed" );
+            transfer( account, token, "🍈 " + itr->project_id.to_string() + " matching prize received via Pomelo.io" );
             claimed = true;
         }
         itr = index.erase( itr );
