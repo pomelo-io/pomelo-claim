@@ -40,4 +40,7 @@ cleos transfer match.pomelo claim.pomelo "1000.0000 EOS" "grant:grant1"
 cleos transfer match.pomelo claim.pomelo "1000.0000 USDT" "grant:grant1" --contract tethertether
 
 # reclaim funds
-cleos push action claim.pomelo reclaim '[grant1]' -p claim.pomelo
+cleos push action claim.pomelo reclaim '[grant1]' -p prjman1
+
+# reclaim funds
+cleos push action claim.pomelo reclaim '[grant1]' -p match.pomelo

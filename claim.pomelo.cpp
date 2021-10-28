@@ -54,9 +54,10 @@ void claimpomelo::claim( const name account )
 [[eosio::action]]
 void claimpomelo::reclaim( const name project_id )
 {
-    require_auth( get_self() );
     config_table _config(get_self(), get_self().value);
     check( _config.exists() && _config.get().status == "ok"_n, CLAIM_MAINTENANCE);
+
+    check( has_auth(_config.get().pomelo_match), "claim.pomelo::reclaim: funds can only be reclaimed by pomelo match account");
 
     claims_table claims( get_self(), get_self().value );
     const auto& claim = claims.get( project_id.value, "claim.pomelo::claim: no claimable funds for [project_id]");
