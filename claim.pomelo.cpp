@@ -6,6 +6,7 @@
 
 
 static const string CLAIM_INVALID_MEMO = "claim.pomelo::on_transfer: invalid memo";
+static const string CLAIM_MAINTENANCE = "claim.pomelo: contract is under maintenance";
 
 [[eosio::action]]
 void claimpomelo::setconfig( const optional<config_row> config )
@@ -29,7 +30,7 @@ void claimpomelo::claim( const name account )
 {
     require_auth( account );
     config_table _config(get_self(), get_self().value);
-    check( _config.exists() && _config.get().status == "ok"_n, "claim.pomelo::on_transfer: contract is under maintenance");
+    check( _config.exists() && _config.get().status == "ok"_n, CLAIM_MAINTENANCE);
 
     claims_table claims( get_self(), get_self().value );
     auto index = claims.get_index<"byfundingacc"_n>();
@@ -47,6 +48,21 @@ void claimpomelo::claim( const name account )
         itr = index.erase( itr );
     }
     check( success, "claim.pomelo::claim: nothing to claim");
+}
+
+[[eosio::action]]
+void claimpomelo::reclaim( const name project_id )
+{
+    require_auth( get_self() );
+    config_table _config(get_self(), get_self().value);
+    check( _config.exists() && _config.get().status == "ok"_n, CLAIM_MAINTENANCE);
+
+    claims_table claims( get_self(), get_self().value );
+    const auto& claim = claims.get( project_id.value, "claim.pomelo::claim: no claimable funds for [project_id]");
+    for(const auto token: claim.tokens){
+        transfer( _config.get().pomelo_match, token, "🍈 " + project_id.to_string() + " matching prize reclaimed" );
+    }
+    claims.erase( claim );
 }
 
 [[eosio::action]]

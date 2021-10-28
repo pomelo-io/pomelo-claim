@@ -114,6 +114,24 @@ public:
     void claim( const name account );
 
     /**
+     * ## ACTION `reclaim`
+     *
+     * Reclaim allocated funds back to Pomelo vault account
+     *
+     * ### params
+     *
+     * - `{name} project_id` - project id to reclaim
+     *
+     * ### example
+     *
+     * ```bash
+     * $ cleos push action claim.pomelo reclaim '["grant1"]' -p claim.pomelo
+     * ```
+     */
+    [[eosio::action]]
+    void reclaim( const name project_id );
+
+    /**
      * ## TRANSFER NOTIFY HANDLER `on_transfer`
      *
      * Process incoming transfer

@@ -31,3 +31,13 @@ cleos transfer match.pomelo claim.pomelo "1000.0000 USDT" "grant:grant1" --contr
 
 # claim funds
 cleos push action claim.pomelo claim '[prjman1]' -p prjman1
+
+# sleep to avoid duplicate trx
+sleep 1
+
+# transfer funds from the vault
+cleos transfer match.pomelo claim.pomelo "1000.0000 EOS" "grant:grant1"
+cleos transfer match.pomelo claim.pomelo "1000.0000 USDT" "grant:grant1" --contract tethertether
+
+# reclaim funds
+cleos push action claim.pomelo reclaim '[grant1]' -p claim.pomelo
