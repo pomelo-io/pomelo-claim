@@ -23,7 +23,7 @@ cleos push action app.pomelo joinround '["grant1", 101]' -p app.pomelo -p prjman
 
 
 # set claim config
-cleos push action claim.pomelo setconfig '{"config":["ok", "app.pomelo", "match.pomelo"]}' -p claim.pomelo
+cleos push action claim.pomelo setconfig '{"config":["ok", "app.pomelo", "match.pomelo", 180]}' -p claim.pomelo
 
 # transfer funds from the vault
 cleos transfer match.pomelo claim.pomelo "1000.0000 EOS" "grant:grant1"

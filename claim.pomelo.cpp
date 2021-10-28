@@ -20,6 +20,7 @@ void claimpomelo::setconfig( const optional<config_row> config )
     }
     check( is_account(config->pomelo_app), "claim.pomelo: invalid pomelo app account");
     check( is_account(config->pomelo_match), "claim.pomelo: invalid pomelo vault account");
+    check( config->claim_period_days > 0, "claim.pomelo: invalid claim period");
 
     config_.set(*config, get_self());
 }
@@ -88,12 +89,11 @@ void claimpomelo::on_transfer( const name from, const name to, const asset quant
 {
     // authenticate incoming `from` account
     require_auth( from );
+    if( from == get_self() || from == "eosio.ram"_n) return;
 
     config_table _config(get_self(), get_self().value);
-    check( _config.exists(), "claimpomelo::on_transfer: config not set");
-
+    check( _config.exists(), CLAIM_MAINTENANCE);
     const auto config = _config.get();
-    if( from == get_self() || from == "eosio.ram"_n) return;
     check( from == config.pomelo_match, "claim.pomelo::on_transfer: only transfers from pomelo vault allowed");
 
     // parse memo
@@ -117,18 +117,19 @@ void claimpomelo::on_transfer( const name from, const name to, const asset quant
 
     check( funding_account.value, "claim.pomelo::on_transfer: empty funding account");
 
-    add_tokens(project_id, funding_account, extended_asset{ quantity, get_first_receiver()});
+    add_tokens(project_id, funding_account, extended_asset{ quantity, get_first_receiver()}, config.claim_period_days);
 }
 
 
-void claimpomelo::add_tokens( const name project_id, const name funding_account, const extended_asset ext_quantity)
+void claimpomelo::add_tokens( const name project_id, const name funding_account, const extended_asset ext_quantity, const uint64_t claim_period_days)
 {
     claims_table claims( get_self(), get_self().value );
 
     const auto modify = [&]( auto& row ) {
         row.funding_account = funding_account;
         row.project_id = project_id;
-        row.updated_at = current_time_point();
+        if( !row.created_at.sec_since_epoch()) row.created_at = current_time_point();
+        row.expires_at = time_point_sec(current_time_point().sec_since_epoch() + claim_period_days * 24 * 60 * 60);
         bool added = false;
         for( auto& token: row.tokens){
             if( token.get_extended_symbol() == ext_quantity.get_extended_symbol()){
@@ -144,7 +145,7 @@ void claimpomelo::add_tokens( const name project_id, const name funding_account,
     if( it == claims.end() ) {
         claims.emplace( get_self(), modify);
     } else {
-        check( it->funding_account == funding_account, "claimpomelo::add_claim: wrong funding account");
+        check( it->funding_account == funding_account, "claimpomelo::add_claim: funding account changed");
         claims.modify( it, same_payer, modify);
     }
 }

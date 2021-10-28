@@ -70,13 +70,16 @@ $ ./scripts/test.sh
 | `param`        | `index_position` | `key_type` |
 |--------------- |------------------|------------|
 | `byfundingacc` | 2                | i64        |
+| `bycreated`    | 3                | i64        |
+| `byexpires`    | 4                | i64        |
 
 ### params
 
 - `{name} project_id` - grant/bounty ID (primary key)
 - `{name} funding_account` - funding account eligible to claim
 - `{vector<extended_asset>} tokens` - claimable tokens
-- `{time_point_sec} updated_at` - updated at time
+- `{time_point_sec} created_at` - created at time
+- `{time_point_sec} expires_at` - expires at time
 
 ### example
 
@@ -85,7 +88,8 @@ $ ./scripts/test.sh
     "project_id": "grant1",
     "funding_account": "prjman1",
     "tokens": ["1000.0000 EOS@eosio.token", "1000.0000 USDT@tethertether"],
-    "updated_at": "2021-12-06T00:00:00"
+    "created_at": "2021-12-06T00:00:00",
+    "expires_at": "2022-12-06T00:00:00"
 }
 ```
 
@@ -137,9 +141,11 @@ Log claim action
 ## NOTIFIER `on_transfer`
 
 Transfer funds for a claim.
+
 Only transfers from Pomelo vault are accepted with the following memo format:
 `grant:{grant_id}` or `bounty:{bounty_id}`.
-After the transfer funds become claimable by the corresponding `funding_account` from Pomelo `bounties` or `grants` table
+
+After the transfer, funds become claimable by the corresponding `funding_account` account for that grant.
 
 ### example
 

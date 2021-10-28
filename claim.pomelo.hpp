@@ -22,6 +22,7 @@ public:
      * - `{name} status` - contract status - ok/disabled
      * - `{name} pomelo_app` - Pomelo contract account (app.pomelo)
      * - `{name} pomelo_match` - Pomelo vault account where transfers come from (match.pomelo)
+     * - `{uint32_t} claim_period_days` - Claim expiry period in days
      *
      * ### example
      *
@@ -30,6 +31,7 @@ public:
      *     "status": "ok",
      *     "pomelo_app": "app.pomelo",
      *     "pomelo_match": "match.pomelo",
+     *     "claim_period_days": 180
      * }
      * ```
      */
@@ -37,6 +39,7 @@ public:
         name    status;
         name    pomelo_app;
         name    pomelo_match;
+        uint32_t claim_period_days;
     };
     typedef eosio::singleton< "config"_n, config_row > config_table;
 
@@ -49,7 +52,8 @@ public:
      * - `{name} project_id` - grant/bounty ID (primary key)
      * - `{name} funding_account` - funding account eligible to claim
      * - `{vector<extended_asset>} tokens` - claimable tokens
-     * - `{time_point_sec} updated_at` - updated at time
+     * - `{time_point_sec} expires_at - claim expires at time
+     * - `{time_point_sec} created_at` - updated at time
      *
      * ### example
      *
@@ -58,7 +62,8 @@ public:
      *      "project_id": "grant1",
      *      "funding_account": "prjman1",
      *      "tokens": ["1000.0000 EOS@eosio.token", "1000.0000 USDT@tethertether"],
-     *      "updated_at": "2021-12-06T00:00:00"
+     *      "expires_at": "2022-12-06T00:00:00"
+     *      "created_at": "2021-12-06T00:00:00"
      * }
      * ```
      */
@@ -66,13 +71,18 @@ public:
         name                    project_id;
         name                    funding_account;
         vector<extended_asset>  tokens;
-        time_point_sec          updated_at;
+        time_point_sec          created_at;
+        time_point_sec          expires_at;
 
         uint64_t primary_key() const { return project_id.value; };
         uint64_t by_funding_account() const { return funding_account.value; };
+        uint64_t by_created() const { return created_at.sec_since_epoch(); };
+        uint64_t by_expires() const { return expires_at.sec_since_epoch(); };
     };
     typedef eosio::multi_index< "claims"_n, claims_row,
-        indexed_by< "byfundingacc"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_funding_account> >
+        indexed_by< "byfundingacc"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_funding_account> >,
+        indexed_by< "bycreated"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_created> >,
+        indexed_by< "byexpires"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_expires> >
      > claims_table;
 
 
@@ -166,7 +176,7 @@ public:
     using claimlog_action = eosio::action_wrapper<"claimlog"_n, &claimpomelo::claimlog>;
 
 private:
-    void add_tokens( const name project_id, const name funding_account, const extended_asset ext_quantity);
+    void add_tokens( const name project_id, const name funding_account, const extended_asset ext_quantity, const uint64_t claim_period_days);
 
     void transfer( const name to, const extended_asset value, const string memo );
 
