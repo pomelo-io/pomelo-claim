@@ -21,26 +21,43 @@ cleos push action app.pomelo setgrant '["prjman1.eosn", "grant1", "prjman1", ["E
 cleos push action app.pomelo setstate '["grant1", "published"]' -p app.pomelo
 cleos push action app.pomelo joinround '["grant1", 101]' -p app.pomelo -p prjman1.eosn
 
+cleos push action app.pomelo setgrant '["prjman1.eosn", "grant2", "prjman1", ["EOS", "USDT"]]' -p app.pomelo -p prjman1.eosn
+cleos push action app.pomelo setstate '["grant2", "published"]' -p app.pomelo
+cleos push action app.pomelo joinround '["grant2", 101]' -p app.pomelo -p prjman1.eosn
 
 # set claim config
+echo "Set config ✔️"
 cleos push action claim.pomelo setconfig '{"config":["ok", "app.pomelo", "match.pomelo", 180]}' -p claim.pomelo
 
 # transfer funds from the vault
-cleos transfer match.pomelo claim.pomelo "1000.0000 EOS" "grant:grant1"
+echo "Transfer funds from the vault ✔️"
+cleos transfer match.pomelo claim.pomelo "900.0000 EOS" "grant:grant1"
+echo "Transfer funds from the vault ✔️"
+cleos transfer match.pomelo claim.pomelo "100.0000 EOS" "grant:grant1"
+echo "Transfer funds from the vault ✔️"
 cleos transfer match.pomelo claim.pomelo "1000.0000 USDT" "grant:grant1" --contract tethertether
+echo "Transfer funds from the vault ✔️"
+cleos transfer match.pomelo claim.pomelo "100.0000 EOS" "grant:grant2"
+echo "Transfer funds from the vault ✔️"
 
 # claim funds
-cleos push action claim.pomelo claim '[prjman1]' -p prjman1
+echo "Claim funds for grant2 ✔️"
+cleos push action claim.pomelo claim '[prjman1, grant1]' -p prjman1
+echo "Claim funds for grant2 ✔️"
+cleos push action claim.pomelo claim '[prjman1, grant2]' -p prjman1
 
 # sleep to avoid duplicate trx
 sleep 1
-
+echo "Transfer funds from the vault ✔️"
 # transfer funds from the vault
 cleos transfer match.pomelo claim.pomelo "1000.0000 EOS" "grant:grant1"
+echo "Transfer funds from the vault ✔️"
 cleos transfer match.pomelo claim.pomelo "1000.0000 USDT" "grant:grant1" --contract tethertether
 
-# reclaim funds
+# reclaim funds - must fail
+echo "Reclaim funds with wrong authority ❌"
 cleos push action claim.pomelo reclaim '[grant1]' -p prjman1
 
 # reclaim funds
+echo "Reclaim funds back to the vault ✔️"
 cleos push action claim.pomelo reclaim '[grant1]' -p match.pomelo

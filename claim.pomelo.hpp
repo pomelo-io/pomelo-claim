@@ -113,15 +113,16 @@ public:
      * ### params
      *
      * - `{name} account` - funding account elibigle for the matching prize claim
+     * - `{name} project_id` - id for a project to claim funds for
      *
      * ### example
      *
      * ```bash
-     * $ cleos push action claim.pomelo claim '["prjman1"]' -p prjman1
+     * $ cleos push action claim.pomelo claim '[prjman1, grant1]' -p prjman1
      * ```
      */
     [[eosio::action]]
-    void claim( const name account );
+    void claim( const name account, const name grant_id );
 
     /**
      * ## ACTION `reclaim`

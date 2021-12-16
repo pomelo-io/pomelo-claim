@@ -27,28 +27,25 @@ void claimpomelo::setconfig( const optional<config_row> config )
 
 
 [[eosio::action]]
-void claimpomelo::claim( const name account )
+void claimpomelo::claim( const name account, const name project_id )
 {
     require_auth( account );
     config_table _config(get_self(), get_self().value);
     check( _config.exists() && _config.get().status == "ok"_n, CLAIM_MAINTENANCE);
 
     claims_table claims( get_self(), get_self().value );
-    auto index = claims.get_index<"byfundingacc"_n>();
-    bool success = false;
-    claimlog_action claim_log( get_self(), { get_self(), "active"_n });
+    const auto& claim = claims.get( project_id.value, "claim.pomelo::claim: nothing to claim");
+    check( claim.funding_account == account, "claim.pomelo::claim: invalid claiming account");
 
-    for( auto itr = index.find( account.value ); itr != index.end() && itr->funding_account == account; ){
-        vector<asset> claimed;
-        for(const auto token: itr->tokens){
-            transfer( account, token, "🍈 " + itr->project_id.to_string() + " matching prize received via Pomelo.io" );
-            claimed.push_back(token.quantity);
-            success = true;
-        }
-        claim_log.send( account, itr->project_id, claimed );
-        itr = index.erase( itr );
+    vector<asset> claimed;
+    for(const auto token: claim.tokens){
+        transfer( account, token, "🍈 " + project_id.to_string() + " matching prize received via Pomelo.io" );
+        claimed.push_back(token.quantity);
     }
-    check( success, "claim.pomelo::claim: nothing to claim");
+    claims.erase( claim );
+
+    claimlog_action claim_log( get_self(), { get_self(), "active"_n });
+    claim_log.send( account, project_id, claimed );
 }
 
 [[eosio::action]]

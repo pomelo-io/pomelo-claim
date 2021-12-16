@@ -14,12 +14,16 @@ cleos transfer match.pomelo claim.pomelo "1000.0000 USDT" "grant:grant1" --contr
 
 # disable claims
 cleos push action claim.pomelo setconfig '{"config":["disabled", "app.pomelo", "match.pomelo"]}' -p claim.pomelo
+
+# reclaim unclaimed funds
+cleos push action claim.pomelo reclaim '[grant1]' -p match.pomelo
+
 ```
 
 ### `@user`
 ```bash
 # claim project funding
-cleos push action claim.pomelo claim '["prjaccount"]]' -p prjaccount
+cleos push action claim.pomelo claim '[prjaccount, grant1]]' -p prjaccount
 
 ```
 
@@ -42,6 +46,7 @@ $ ./scripts/test.sh
 - [TABLE `claims`](#table-claims)
 - [ACTION `setconfig`](#action-setconfig)
 - [ACTION `claim`](#action-claim)
+- [ACTION `reclaim`](#action-reclaim)
 - [ACTION `claimlog`](#action-claimlog)
 - [NOTIFIER `on_transfer`](#notifier-on_transfer)
 
@@ -119,11 +124,27 @@ Claim funds
 ### params
 
 - `{name} account` - account making the claim
+- `{name} project_id` - project id of the project to claim funds for
 
 ### example
 
 ```bash
-$ cleos push action claim.pomelo claim '["prjaccount"]' -p prjaccount
+$ cleos push action claim.pomelo claim '["prjaccount", "grant1"]' -p prjaccount
+```
+## ACTION `reclaim`
+
+- **authority**: `match.pomelo`
+
+Reclaim unclaimed funds back into vault
+
+### params
+
+- `{name} project_id` - project id
+
+### example
+
+```bash
+$ cleos push action claim.pomelo reclaim '["grant1"]' -p match.pomelo
 ```
 
 ## ACTION `claimlog`
