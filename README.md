@@ -6,7 +6,7 @@
 
 ```bash
 # configure app
-cleos push action claim.pomelo setconfig '{"config":["ok", "app.pomelo", "match.pomelo"]}' -p claim.pomelo
+cleos push action claim.pomelo setconfig '{"config":["ok", "login.eosn", "app.pomelo", "match.pomelo", ["shufti"], 180]}' -p claim.pomelo
 
 # transfer matching pool tokens from the vault
 cleos transfer match.pomelo claim.pomelo "1000.0000 EOS" "grant:grant1"
@@ -53,16 +53,22 @@ $ ./scripts/test.sh
 ## SINGLETON `config`
 
 - `{name} status` - contract status `ok`/`disabled`
-- `{name} pomelo_app` - Pomelo app account
-- `{name} pomelo_match` - Pomelo vault account
+- `{name} login_contract` - EOSN Login contract account (login.eosn)
+- `{name} pomelo_app` - Pomelo contract account (app.pomelo)
+- `{name} pomelo_match` - Pomelo vault account to receive and reclaim
+- `{set<name>} kyc_providers` - EOSN socials that are used for KYC
+- `{uint32_t} claim_period_days` - Claim expiry period in days
 
 ### example
 
 ```json
 {
-    "status": "ok",
-    "pomelo_app": "app.pomelo",
-    "pomelo_match": "match.pomelo"
+     "status": "ok",
+     "login_contract": "login.eosn",
+     "pomelo_app": "app.pomelo",
+     "pomelo_match": "match.pomelo",
+     "kyc_providers": ["shufti"],
+     "claim_period_days": 180
 }
 ```
 
@@ -81,6 +87,7 @@ $ ./scripts/test.sh
 ### params
 
 - `{name} project_id` - grant/bounty ID (primary key)
+- `{name} author_user_id` - grant author user id for KYC check
 - `{name} funding_account` - funding account eligible to claim
 - `{vector<extended_asset>} tokens` - claimable tokens
 - `{time_point_sec} created_at` - created at time
@@ -91,6 +98,7 @@ $ ./scripts/test.sh
 ```json
 {
     "project_id": "grant1",
+    "author_user_id": "prjman1.eosn",
     "funding_account": "prjman1",
     "tokens": ["1000.0000 EOS@eosio.token", "1000.0000 USDT@tethertether"],
     "created_at": "2021-12-06T00:00:00",
@@ -111,7 +119,7 @@ Set contract configuration
 ### example
 
 ```bash
-$ cleos push action claim.pomelo setconfig '{"config":["ok", "app.pomelo", "match.pomelo"]}' -p claim.pomelo
+$ cleos push action claim.pomelo setconfig '{"config":["ok", "login.eosn", "app.pomelo", "match.pomelo", ["shufti"], 180]}' -p claim.pomelo
 $ cleos push action claim.pomelo setconfig '{"config":null}' -p claim.pomelo
 ```
 
@@ -119,11 +127,11 @@ $ cleos push action claim.pomelo setconfig '{"config":null}' -p claim.pomelo
 
 - **authority**: `account`
 
-Claim funds
+Claim funds. Project author must pass KYC to be able to claim.
 
 ### params
 
-- `{name} account` - account making the claim
+- `{name} account` - EOS account making the claim
 - `{name} project_id` - project id of the project to claim funds for
 
 ### example
