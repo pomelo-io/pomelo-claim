@@ -105,24 +105,20 @@ void claimpomelo::on_transfer( const name from, const name to, const asset quant
 
     check(project_id.value, "claim.pomelo::on_transfer: invalid project id");
 
-    name funding_account, author_user_id;
+    pomelo::projects_row project;
     if (project_type == "grant"_n) {
         pomelo::grants_table grants( config.pomelo_app, config.pomelo_app.value );
-        const auto& grant = grants.get(project_id.value, "claim.pomelo::on_transfer: grant not found");
-        funding_account = grant.funding_account;
-        author_user_id = grant.author_user_id;
+        project = grants.get(project_id.value, "claim.pomelo::on_transfer: grant not found");
     }
     else if (project_type == "bounty"_n) {
         pomelo::bounties_table bounties( config.pomelo_app, config.pomelo_app.value );
-        const auto& bounty = bounties.get(project_id.value, "claim.pomelo::on_transfer: bounty not found");
-        funding_account = bounty.funding_account;
-        author_user_id = bounty.author_user_id;
+        project = bounties.get(project_id.value, "claim.pomelo::on_transfer: bounty not found");
     }
     else check( false, CLAIM_INVALID_MEMO);
 
-    check( funding_account.value, "claim.pomelo::on_transfer: empty funding account");
+    check( project.funding_account.value, "claim.pomelo::on_transfer: empty funding account");
 
-    add_tokens(project_id, author_user_id, funding_account, extended_asset{ quantity, get_first_receiver()}, config.claim_period_days);
+    add_tokens(project_id, project.author_user_id, project.funding_account, extended_asset{ quantity, get_first_receiver()}, config.claim_period_days);
 }
 
 void claimpomelo::check_kyc( const name author_user_id )
