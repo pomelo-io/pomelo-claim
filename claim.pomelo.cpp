@@ -1,6 +1,7 @@
 #include <eosio.token/eosio.token.hpp>
 #include <sx.utils/utils.hpp>
 #include <pomelo.app/app.pomelo.hpp>
+#include <eosn.login/login.eosn.hpp>
 
 #include "claim.pomelo.hpp"
 
@@ -36,6 +37,8 @@ void claimpomelo::claim( const name account, const name project_id )
     claims_table claims( get_self(), get_self().value );
     const auto& claim = claims.get( project_id.value, "claim.pomelo::claim: nothing to claim");
     check( claim.funding_account == account, "claim.pomelo::claim: invalid claiming account");
+
+    check_kyc( claim.author_user_id );
 
     vector<asset> claimed;
     for(const auto token: claim.tokens){
@@ -102,29 +105,44 @@ void claimpomelo::on_transfer( const name from, const name to, const asset quant
 
     check(project_id.value, "claim.pomelo::on_transfer: invalid project id");
 
-    name funding_account;
+    pomelo::projects_row project;
     if (project_type == "grant"_n) {
         pomelo::grants_table grants( config.pomelo_app, config.pomelo_app.value );
-        funding_account = grants.get(project_id.value, "claim.pomelo::on_transfer: grant not found").funding_account;
+        project = grants.get(project_id.value, "claim.pomelo::on_transfer: grant not found");
     }
     else if (project_type == "bounty"_n) {
         pomelo::bounties_table bounties( config.pomelo_app, config.pomelo_app.value );
-        funding_account = bounties.get(project_id.value, "claim.pomelo::on_transfer: bounty not found").funding_account;
+        project = bounties.get(project_id.value, "claim.pomelo::on_transfer: bounty not found");
     }
     else check( false, CLAIM_INVALID_MEMO);
 
-    check( funding_account.value, "claim.pomelo::on_transfer: empty funding account");
+    check( project.funding_account.value, "claim.pomelo::on_transfer: empty funding account");
 
-    add_tokens(project_id, funding_account, extended_asset{ quantity, get_first_receiver()}, config.claim_period_days);
+    add_tokens(project_id, project.author_user_id, project.funding_account, extended_asset{ quantity, get_first_receiver()}, config.claim_period_days);
 }
 
+void claimpomelo::check_kyc( const name author_user_id )
+{
+    config_table _config(get_self(), get_self().value);
+    const auto& config = _config.get();
 
-void claimpomelo::add_tokens( const name project_id, const name funding_account, const extended_asset ext_quantity, const uint64_t claim_period_days)
+    eosn::login::users_table _users( config.login_contract, config.login_contract.value );
+    const auto& user = _users.get( author_user_id.value, "claim.pomelo::check_kyc: [author_user_id] not found");
+
+    for( const auto& kyc: config.kyc_providers ) {
+        if( user.socials.count(kyc) ) return;
+    }
+
+    check( false, "claim.pomelo::check_kyc: project [author_user_id] needs to pass KYC first" );
+}
+
+void claimpomelo::add_tokens( const name project_id, const name author_user_id, const name funding_account, const extended_asset ext_quantity, const uint64_t claim_period_days)
 {
     claims_table claims( get_self(), get_self().value );
 
     const auto modify = [&]( auto& row ) {
         row.funding_account = funding_account;
+        row.author_user_id = author_user_id;
         row.project_id = project_id;
         if( !row.created_at.sec_since_epoch()) row.created_at = current_time_point();
         row.expires_at = time_point_sec(current_time_point().sec_since_epoch() + claim_period_days * 24 * 60 * 60);

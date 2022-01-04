@@ -20,8 +20,10 @@ public:
      * ## TABLE `config`
      *
      * - `{name} status` - contract status - ok/disabled
+     * - `{name} login_contract` - EOSN Login contract account (login.eosn)
      * - `{name} pomelo_app` - Pomelo contract account (app.pomelo)
      * - `{name} pomelo_match` - Pomelo vault account where transfers come from (match.pomelo)
+     * - `{set<name>} kyc_providers` - EOSN socials that are used for KYC
      * - `{uint32_t} claim_period_days` - Claim expiry period in days
      *
      * ### example
@@ -29,17 +31,21 @@ public:
      * ```json
      * {
      *     "status": "ok",
+     *     "login_contract": "login.eosn",
      *     "pomelo_app": "app.pomelo",
      *     "pomelo_match": "match.pomelo",
+     *     "kyc_providers": ["shufti"],
      *     "claim_period_days": 180
      * }
      * ```
      */
     struct [[eosio::table("config")]] config_row {
-        name    status;
-        name    pomelo_app;
-        name    pomelo_match;
-        uint32_t claim_period_days;
+        name            status;
+        name            login_contract;
+        name            pomelo_app;
+        name            pomelo_match;
+        vector<name>    kyc_providers;
+        uint32_t        claim_period_days;
     };
     typedef eosio::singleton< "config"_n, config_row > config_table;
 
@@ -50,6 +56,7 @@ public:
      * *scope*: `get_self()`
      *
      * - `{name} project_id` - grant/bounty ID (primary key)
+     * - `{name} author_user_id` - grant author user id for KYC check
      * - `{name} funding_account` - funding account eligible to claim
      * - `{vector<extended_asset>} tokens` - claimable tokens
      * - `{time_point_sec} expires_at - claim expires at time
@@ -60,6 +67,7 @@ public:
      * ```json
      * {
      *      "project_id": "grant1",
+     *      "author_user_id": "prjman1.eosn",
      *      "funding_account": "prjman1",
      *      "tokens": ["1000.0000 EOS@eosio.token", "1000.0000 USDT@tethertether"],
      *      "expires_at": "2022-12-06T00:00:00"
@@ -69,6 +77,7 @@ public:
      */
     struct [[eosio::table("claims")]] claims_row {
         name                    project_id;
+        name                    author_user_id;
         name                    funding_account;
         vector<extended_asset>  tokens;
         time_point_sec          created_at;
@@ -177,9 +186,11 @@ public:
     using claimlog_action = eosio::action_wrapper<"claimlog"_n, &claimpomelo::claimlog>;
 
 private:
-    void add_tokens( const name project_id, const name funding_account, const extended_asset ext_quantity, const uint64_t claim_period_days);
+    void add_tokens( const name project_id, const name author_user_id, const name funding_account, const extended_asset ext_quantity, const uint64_t claim_period_days);
 
     void transfer( const name to, const extended_asset value, const string memo );
+
+    void check_kyc( const name author_user_id );
 
     template <typename T>
     void clear_table( T& table, uint64_t rows_to_clear );
