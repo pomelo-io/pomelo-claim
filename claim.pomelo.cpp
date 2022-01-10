@@ -68,13 +68,13 @@ void claimpomelo::claim( const uint16_t round_id, const name grant_id )
     // ** authority check is later
     check_status();
 
-    claims_table _claims( get_self(), get_self().value );
+    claims_table _claims( get_self(), round_id );
     const auto& claim = _claims.get( grant_id.value, "claim.pomelo::claim: [grant_id] does not exists");
 
     // validate claim
     // ==============
     // authority by [author or funding or self]
-    if ( !has_auth(claim.funding_account) || !has_auth(claim.author_user_id) || !has_auth(get_self()) ) {
+    if ( !has_auth(claim.funding_account) && !has_auth(claim.author_user_id) && !has_auth(get_self()) ) {
         check( false, "claim.pomelo::claim: invalid claiming account (claim must be authorized by [funding_account] or [author_user_id] )");
     }
     check( claim.claimed_at.sec_since_epoch() == 0, "claim.pomelo::claim: grant has already claimed");

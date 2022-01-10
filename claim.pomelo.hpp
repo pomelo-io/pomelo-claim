@@ -134,7 +134,7 @@ public:
     /**
      * ## ACTION `reclaim`
      *
-     * Reclaim allocated funds back to Pomelo vault account
+     * Remove claim
      *
      * - **authority**: `get_self()`
      *
@@ -175,9 +175,9 @@ public:
     void setclaim( const uint16_t round_id, const name grant_id, const extended_asset claim );
 
     /**
-     * ## ACTION `setclaim`
+     * ## ACTION `approve`
      *
-     * Set claim allocation based on matching amounts
+     * Approve/disapprove the claim
      *
      * - **authority**: `get_self()`
      *
@@ -190,7 +190,7 @@ public:
      * ### example
      *
      * ```bash
-     * $ cleos push action claim.pomelo setclaim '[101, "grant1", true]' -p claim.pomelo
+     * $ cleos push action claim.pomelo approve '[101, "grant1", true]' -p claim.pomelo
      * ```
      */
     [[eosio::action]]
