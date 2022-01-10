@@ -16,6 +16,8 @@ cleos create account eosio tethertether EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtH
 cleos create account eosio prjman1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 cleos create account eosio prjgrant1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 cleos create account eosio prjbounty1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+cleos create account eosio user1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+
 
 # contract
 cleos set contract eosio.token ./include/eosio.token eosio.token.wasm eosio.token.abi
@@ -40,6 +42,7 @@ cleos push action tethertether issue '["eosio", "10000000.0000 USDT", "init"]' -
 # transfer tokens
 cleos transfer eosio match.pomelo "1000000.0000 EOS" ""
 cleos transfer eosio match.pomelo "1000000.0000 USDT" "" --contract tethertether
+cleos transfer eosio user1 "100.0000 EOS" ""
 
 # set price in oracle contract
 cleos push action oracle.defi setprice '[1, ["4,EOS", "eosio.token"], 4, 50000]' -p oracle.defi
