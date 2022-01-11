@@ -35,7 +35,7 @@ cleos transfer user1 app.pomelo "10.0000 EOS" "grant:grant2"
 
 # set claim config
 echo "Set config ✅"
-cleos push action claim.pomelo setconfig '{"config":["ok", "login.eosn", "app.pomelo", "match.pomelo", ["shufti"], 180]}' -p claim.pomelo
+cleos push action claim.pomelo setconfig '{"config":["ok", "login.eosn", "app.pomelo"]}' -p claim.pomelo
 
 #  set claim
 echo "Set grant1 claim ✅"

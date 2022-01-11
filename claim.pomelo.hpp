@@ -12,7 +12,7 @@ public:
     using contract::contract;
 
     /**
-     * ## TABLE `config`
+     * ## SINGLETON `config`
      *
      * - `{name} status` - contract status - ok/disabled
      * - `{name} login_contract` - EOSN Login contract account (login.eosn)
@@ -38,7 +38,19 @@ public:
     /**
      * ## TABLE `claims`
      *
-     * *scope*: `{uint16_t} round_id`
+     * - **scope**: `{uint16_t} round_id`
+     *
+     * ### multi-indexes
+     *
+     * | `param`        | `index_position` | `key_type` |
+     * |--------------- |------------------|------------|
+     * | `byauthor`     | 2                | i64        |
+     * | `byfunding`    | 3                | i64        |
+     * | `byclaimed`    | 4                | i64        |
+     * | `bycreated`    | 5                | i64        |
+     * | `byexpires`    | 6                | i64        |
+     *
+     * ### params
      *
      * - `{name} grant_id` - grant ID (primary key)
      * - `{name} author_user_id` - grant author user id for KYC check
@@ -99,12 +111,13 @@ public:
      *
      * ### params
      *
-     * - `{config_row} config` - contract config
+     * - `{optional<config_row>} config` - configuration (reset if null)
      *
      * ### example
      *
      * ```bash
-     * $ cleos push action claim.pomelo setconfig '{"config":{"status": "ok", "pomelo_app": "app.pomelo", "pomelo_match": "match.pomelo"}}' -p claim.pomelo
+     * $ cleos push action claim.pomelo setconfig '{"config":["ok", "login.eosn", "app.pomelo"]}' -p claim.pomelo
+     * $ cleos push action claim.pomelo setconfig '[null]' -p claim.pomelo
      * ```
      */
     [[eosio::action]]
