@@ -2,6 +2,13 @@
 
 ## Usage
 
+### `@user`
+
+```bash
+# claim grant rewards (authorized by funding account)
+cleos push action claim.pomelo claim '[101, grant1]]' -p myaccount
+```
+
 ### `@admin`
 
 ```bash
@@ -16,13 +23,6 @@ cleos push action claim.pomelo approve '[101, "grant1", true]' -p claim.pomelo
 
 # cancel claim amount
 cleos push action claim.pomelo cancel '[101, "grant1"]' -p claim.pomelo
-```
-
-### `@user`
-
-```bash
-# claim grant rewards
-cleos push action claim.pomelo claim '["myaccount", grant1]]' -p myaccount
 ```
 
 ## Testing
