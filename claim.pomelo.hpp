@@ -46,9 +46,6 @@ public:
      * |--------------- |------------------|------------|
      * | `byauthor`     | 2                | i64        |
      * | `byfunding`    | 3                | i64        |
-     * | `byclaimed`    | 4                | i64        |
-     * | `bycreated`    | 5                | i64        |
-     * | `byexpires`    | 6                | i64        |
      *
      * ### params
      *
@@ -92,16 +89,10 @@ public:
         uint64_t primary_key() const { return grant_id.value; };
         uint64_t by_author_user_id() const { return author_user_id.value; };
         uint64_t by_funding_account() const { return funding_account.value; };
-        uint64_t by_claimed() const { return claimed_at.sec_since_epoch(); };
-        uint64_t by_created() const { return created_at.sec_since_epoch(); };
-        uint64_t by_expires() const { return expires_at.sec_since_epoch(); };
     };
     typedef eosio::multi_index< "claims"_n, claims_row,
         indexed_by< "byauthor"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_author_user_id> >,
-        indexed_by< "byfunding"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_funding_account> >,
-        indexed_by< "byclaimed"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_claimed> >,
-        indexed_by< "bycreated"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_created> >,
-        indexed_by< "byexpires"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_expires> >
+        indexed_by< "byfunding"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_funding_account> >
     > claims_table;
 
     /**

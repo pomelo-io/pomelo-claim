@@ -76,9 +76,6 @@ $ ./scripts/test.sh
 |--------------- |------------------|------------|
 | `byauthor`     | 2                | i64        |
 | `byfunding`    | 3                | i64        |
-| `byclaimed`    | 4                | i64        |
-| `bycreated`    | 5                | i64        |
-| `byexpires`    | 6                | i64        |
 
 ### params
 
