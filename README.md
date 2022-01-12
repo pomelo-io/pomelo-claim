@@ -38,6 +38,79 @@ $ ./scripts/restart
 $ ./scripts/test.sh
 ```
 
+## HTTP requests
+
+#### all claims for `round_id`
+
+```json
+curl -X 'POST' \
+  "https://eos.eosn.io/v1/chain/get_table_rows" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "code": "claim.pomelo",
+  "scope": 101,
+  "table": "claims",
+  "json": true,
+  "limit": 100
+}' | jq .
+```
+
+#### by `grant_id`
+
+```json
+curl -X 'POST' \
+  "https://eos.eosn.io/v1/chain/get_table_rows" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "code": "claim.pomelo",
+  "scope": 101,
+  "table": "claims",
+  "json": true,
+  "lower_bound": "mygrant",
+  "upper_bound": "mygrant"
+}' | jq .
+```
+
+#### by `author_user_id` (EOSN account)
+
+```json
+curl -X 'POST' \
+  "https://eos.eosn.io/v1/chain/get_table_rows" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "code": "claim.pomelo",
+  "scope": 101,
+  "table": "claims",
+  "json": true,
+  "lower_bound": "123.eosn",
+  "upper_bound": "123.eosn",
+  "index_position": "secondary",
+  "key_type": "name"
+}' | jq .
+```
+
+#### by `funding_account` (EOS account)
+
+```json
+curl -X 'POST' \
+  "https://eos.eosn.io/v1/chain/get_table_rows" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "code": "claim.pomelo",
+  "scope": 101,
+  "table": "claims",
+  "json": true,
+  "lower_bound": "myaccount",
+  "upper_bound": "myaccount",
+  "index_position": "tertiary",
+  "key_type": "name"
+}' | jq .
+```
+
 ## Table of Content
 
 - [SINGLETON `config`](#singleton-config)
@@ -74,8 +147,9 @@ $ ./scripts/test.sh
 
 | `param`        | `index_position` | `key_type` |
 |--------------- |------------------|------------|
-| `byauthor`     | 2                | i64        |
-| `byfunding`    | 3                | i64        |
+| `bygrant`      | `primary`   (1)  | name       |
+| `byauthor`     | `secondary` (2)  | name       |
+| `byfunding`    | `tertiary`  (3)  | name       |
 
 ### params
 
