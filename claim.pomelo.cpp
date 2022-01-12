@@ -5,8 +5,16 @@
 
 #include "claim.pomelo.hpp"
 
-// error messages
-static const string CLAIM_MAINTENANCE = "claim.pomelo: contract is under maintenance";
+// error messages to user
+static const string CONTACT_ADMIN = ", please contact Pomelo admin";
+static const string ERROR_MAINTENANCE = "claim.pomelo: contract is under maintenance" + CONTACT_ADMIN;
+static const string ERROR_REQUIRE_APPROVE = "claim.pomelo::claim: grant requires admin approval" + CONTACT_ADMIN;
+static const string ERROR_NO_BALANCE = "claim.pomelo::transfer: not enough balance to transfer" + CONTACT_ADMIN;
+static const string ERROR_AUTHORITY_BY = "claim.pomelo::claim: invalid claiming account (claim must be authorized by [funding_account] or [author_user_id] )";
+static const string ERROR_ALREADY_CLAIMED = "claim.pomelo::claim: grant has already claimed";
+static const char* ERROR_GRANT_NOT_EXISTS = "claim.pomelo::claim: [grant_id] does not exists";
+static const char* ERROR_KYC_NOT_FOUND = "claim.pomelo::check_kyc: [author_user_id] not found";
+static const string ERROR_KYC_REQUIRED = "claim.pomelo::check_kyc: grant [author_user_id] needs to first pass KYC";
 
 // variables
 static const name KYC_PROVIDER = "shufti"_n;
@@ -52,6 +60,12 @@ void claimpomelo::setclaim( const uint16_t round_id, const name grant_id, const 
     // no duplicates grant claims
     check( _claims.find( grant_id.value ) == _claims.end(), "claim.pomelo::setclaim: [grant_id] already exists");
 
+    // check if token is valid
+    check( is_account( claim.contract ), "claim.pomelo::setclaim: [claim] token contract does not exists");
+    const symbol sym = claim.quantity.symbol;
+    const asset supply = token::get_supply(claim.contract, sym.code() );
+    check( supply.symbol == sym, "claim.pomelo::setclaim: [claim] has invalid supply symbol");
+
     _claims.emplace( get_self(), [&]( auto& row ) {
         row.funding_account = grant.funding_account;
         row.author_user_id = grant.author_user_id;
@@ -69,17 +83,17 @@ void claimpomelo::claim( const uint16_t round_id, const name grant_id )
     check_status();
 
     claims_table _claims( get_self(), round_id );
-    const auto& claim = _claims.get( grant_id.value, "claim.pomelo::claim: [grant_id] does not exists");
+    const auto& claim = _claims.get( grant_id.value, ERROR_GRANT_NOT_EXISTS );
 
     // validate claim
     // ==============
     // authority by [author or funding or self]
     if ( !has_auth(claim.funding_account) && !has_auth(claim.author_user_id) && !has_auth(get_self()) ) {
-        check( false, "claim.pomelo::claim: invalid claiming account (claim must be authorized by [funding_account] or [author_user_id] )");
+        check( false, ERROR_AUTHORITY_BY );
     }
-    check( claim.claimed_at.sec_since_epoch() == 0, "claim.pomelo::claim: grant has already claimed");
-    check( claim.claim.quantity.amount != 0, "claim.pomelo::claim: grant has already claimed");
-    check( claim.approved, "claim.pomelo::claim: grant claim has not yet been approved");
+    check( claim.claimed_at.sec_since_epoch() == 0, ERROR_ALREADY_CLAIMED );
+    check( claim.claim.quantity.amount != 0, ERROR_ALREADY_CLAIMED );
+    check( claim.approved, ERROR_REQUIRE_APPROVE );
     check_kyc( claim.author_user_id );
 
     // transfer matching prize to funding account
@@ -103,7 +117,7 @@ void claimpomelo::cancel( const uint16_t round_id, const name grant_id )
     require_auth( get_self() );
 
     claims_table _claims( get_self(), round_id );
-    const auto& claim = _claims.get( grant_id.value, "claim.pomelo::claim: [grant_id] does not exists");
+    const auto& claim = _claims.get( grant_id.value, ERROR_GRANT_NOT_EXISTS );
     _claims.erase( claim );
 }
 
@@ -124,7 +138,7 @@ void claimpomelo::approve( const uint16_t round_id, const name grant_id, const b
 void claimpomelo::check_status()
 {
     config_table _config(get_self(), get_self().value);
-    check( _config.exists() && _config.get().status == "ok"_n, CLAIM_MAINTENANCE);
+    check( _config.exists() && _config.get().status == "ok"_n, ERROR_MAINTENANCE);
 }
 
 [[eosio::action]]
@@ -139,7 +153,7 @@ void claimpomelo::claimlog( const uint16_t round_id, const name grant_id, const 
 void claimpomelo::transfer( const name to, const extended_asset value, const string memo )
 {
     const auto balance = sx::utils::get_balance(value.get_extended_symbol(), get_self()).quantity;
-    check( balance >= value.quantity, "claim.pomelo::transfer: not enough balance to transfer, please contact Pomelo admin");
+    check( balance >= value.quantity, ERROR_NO_BALANCE );
 
     eosio::token::transfer_action transfer( value.contract, { get_self(), "active"_n });
     transfer.send( get_self(), to, value.quantity, memo );
@@ -151,8 +165,8 @@ void claimpomelo::check_kyc( const name author_user_id )
     const auto& config = _config.get();
 
     eosn::login::users_table _users( config.login_contract, config.login_contract.value );
-    const auto& user = _users.get( author_user_id.value, "claim.pomelo::check_kyc: [author_user_id] not found");
-    check( user.socials.count(KYC_PROVIDER), "claim.pomelo::check_kyc: project [author_user_id] needs to pass KYC first" );
+    const auto& user = _users.get( author_user_id.value, ERROR_KYC_NOT_FOUND);
+    check( user.socials.count(KYC_PROVIDER), ERROR_KYC_REQUIRED );
 }
 
 template <typename T>
