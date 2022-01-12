@@ -145,7 +145,7 @@ public:
     void claim( const uint16_t round_id, const name grant_id );
 
     /**
-     * ## ACTION `reclaim`
+     * ## ACTION `cancel`
      *
      * Remove claim
      *
@@ -154,16 +154,16 @@ public:
      * ### params
      *
      * - `{uint16_t} round_id` - round ID
-     * - `{name} grant_id` - grant ID to reclaim
+     * - `{name} grant_id` - grant ID to cancel
      *
      * ### example
      *
      * ```bash
-     * $ cleos push action claim.pomelo reclaim '[101, "grant1"]' -p claim.pomelo
+     * $ cleos push action claim.pomelo cancel '[101, "grant1"]' -p claim.pomelo
      * ```
      */
     [[eosio::action]]
-    void reclaim( const uint16_t round_id, const name grant_id );
+    void cancel( const uint16_t round_id, const name grant_id );
 
     /**
      * ## ACTION `setclaim`

@@ -98,7 +98,7 @@ void claimpomelo::claim( const uint16_t round_id, const name grant_id )
 }
 
 [[eosio::action]]
-void claimpomelo::reclaim( const uint16_t round_id, const name grant_id )
+void claimpomelo::cancel( const uint16_t round_id, const name grant_id )
 {
     require_auth( get_self() );
 

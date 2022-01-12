@@ -6,25 +6,23 @@
 
 ```bash
 # configure app
-cleos push action claim.pomelo setconfig '{"config":["ok", "login.eosn", "app.pomelo", "match.pomelo", ["shufti"], 180]}' -p claim.pomelo
+cleos push action claim.pomelo setconfig '{"config":["ok", "login.eosn", "app.pomelo"]}' -p claim.pomelo
 
-# transfer matching pool tokens from the vault
-cleos transfer match.pomelo claim.pomelo "1000.0000 EOS" "grant:grant1"
-cleos transfer match.pomelo claim.pomelo "1000.0000 USDT" "grant:grant1" --contract tethertether
+# set eligible claim amount
+cleos push action claim.pomelo setclaim '[101, "grant1", ["1.0000 EOS", "eosio.token"]]' -p claim.pomelo
 
-# disable claims
-cleos push action claim.pomelo setconfig '{"config":["disabled", "app.pomelo", "match.pomelo"]}' -p claim.pomelo
+# admin approves claim
+cleos push action claim.pomelo approve '[101, "grant1", true]' -p claim.pomelo
 
-# reclaim unclaimed funds
-cleos push action claim.pomelo reclaim '[grant1]' -p match.pomelo
-
+# cancel claim amount
+cleos push action claim.pomelo cancel '[101, "grant1"]' -p claim.pomelo
 ```
 
 ### `@user`
-```bash
-# claim project funding
-cleos push action claim.pomelo claim '[prjaccount, grant1]]' -p prjaccount
 
+```bash
+# claim grant rewards
+cleos push action claim.pomelo claim '["myaccount", grant1]]' -p myaccount
 ```
 
 ## Testing
@@ -44,11 +42,11 @@ $ ./scripts/test.sh
 
 - [SINGLETON `config`](#singleton-config)
 - [TABLE `claims`](#table-claims)
-- [ACTION `setconfig`](#action-setconfig)
 - [ACTION `claim`](#action-claim)
-- [ACTION `reclaim`](#action-reclaim)
 - [ACTION `setclaim`](#action-setclaim)
 - [ACTION `approve`](#action-approve)
+- [ACTION `cancel`](#action-cancel)
+- [ACTION `setconfig`](#action-setconfig)
 - [ACTION `claimlog`](#action-claimlog)
 - [NOTIFIER `on_transfer`](#notifier-on_transfer)
 
@@ -110,23 +108,6 @@ $ ./scripts/test.sh
 }
 ```
 
-## ACTION `setconfig`
-
-- **authority**: `get_self()`
-
-Set contract configuration
-
-### params
-
-- `{optional<config_row>} config` - configuration (reset if null)
-
-### example
-
-```bash
-$ cleos push action claim.pomelo setconfig '{"config": ["ok", "login.eosn", "app.pomelo"]}' -p claim.pomeloclaim.pomelo
-$ cleos push action claim.pomelo setconfig '[null]' -p claim.pomelo
-```
-
 ## ACTION `claim`
 
 Claim allocated funds
@@ -144,22 +125,6 @@ Claim allocated funds
 $ cleos push action claim.pomelo claim '[101, "grant1"]' -p myaccount
 ```
 
-## ACTION `reclaim`
-
-Remove claim
-
-- **authority**: `get_self()`
-
-### params
-
-- `{uint16_t} round_id` - round ID
-- `{name} grant_id` - grant ID to reclaim
-
-### example
-
-```bash
-$ cleos push action claim.pomelo reclaim '[101, "grant1"]' -p claim.pomelo
-```
 
 ## ACTION `setclaim`
 
@@ -195,6 +160,40 @@ Approve/disapprove the claim
 
 ```bash
 $ cleos push action claim.pomelo approve '[101, "grant1", true]' -p claim.pomelo
+```
+
+## ACTION `cancel`
+
+Remove claim
+
+- **authority**: `get_self()`
+
+### params
+
+- `{uint16_t} round_id` - round ID
+- `{name} grant_id` - grant ID to cancel
+
+### example
+
+```bash
+$ cleos push action claim.pomelo cancel '[101, "grant1"]' -p claim.pomelo
+```
+
+## ACTION `setconfig`
+
+- **authority**: `get_self()`
+
+Set contract configuration
+
+### params
+
+- `{optional<config_row>} config` - configuration (reset if null)
+
+### example
+
+```bash
+$ cleos push action claim.pomelo setconfig '{"config": ["ok", "login.eosn", "app.pomelo"]}' -p claim.pomeloclaim.pomelo
+$ cleos push action claim.pomelo setconfig '[null]' -p claim.pomelo
 ```
 
 ## ACTION `claimlog`
