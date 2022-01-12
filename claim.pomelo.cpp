@@ -73,6 +73,7 @@ void claimpomelo::setclaim( const uint16_t round_id, const name grant_id, const 
         row.created_at = current_time_point();
         row.expires_at = time_point_sec(current_time_point().sec_since_epoch() + CLAIM_PERIOD_DAYS * 24 * 60 * 60);
         row.claim = claim;
+        row.claimed = { 0, claim.get_extended_symbol() };
     });
 }
 
