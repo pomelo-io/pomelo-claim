@@ -37,13 +37,23 @@ cleos transfer user1 app.pomelo "10.0000 EOS" "grant:grant2"
 echo "Set config ✅"
 cleos push action claim.pomelo setconfig '{"config":["ok", "login.eosn", "app.pomelo"]}' -p claim.pomelo
 
+echo "Set invalid claim - must fail ❌"
+cleos push action claim.pomelo setclaim '[101, grant3, ["100.0000 EOS","eosio.token"]]' -p claim.pomelo
+
+echo "Set invalid claim - must fail ❌"
+cleos push action claim.pomelo setclaim '[101, grant2, ["100.00000 EOS","eosio.token"]]' -p claim.pomelo
+
+echo "Set invalid claim - must fail ❌"
+cleos push action claim.pomelo setclaim '[101, grant2, ["100.0000 EOS","bad.token"]]' -p claim.pomelo
+
 #  set claim
 echo "Set grant1 claim ✅"
 cleos push action claim.pomelo setclaim '[101, grant1, ["900.0000 EOS","eosio.token"]]' -p claim.pomelo
 echo "Set grant2 claim ✅"
 cleos push action claim.pomelo setclaim '[101, grant2, ["100.0000 EOS","eosio.token"]]' -p claim.pomelo
-# echo "Set grant1 claim ✅"
-# cleos push action claim.pomelo setclaim '[101, grant1, ["1000.0000 USDT","tethertether"]]' -p claim.pomelo
+
+echo "Set already existing claim - must fail ❌"
+cleos push action claim.pomelo setclaim '[101, grant1, ["100.0000 EOS","bad.token"]]' -p claim.pomelo
 
 # transfer tokens
 echo "Transfering tokens for claim ✅"
@@ -94,8 +104,8 @@ cleos transfer match.pomelo claim.pomelo "1000.0000 EOS" "for claim"
 
 # reclaim funds - must fail
 echo "Reclaim funds with wrong authority - must fail ❌"
-cleos push action claim.pomelo reclaim '[101, grant1]' -p prjman1
+cleos push action claim.pomelo cancel '[101, grant1]' -p prjman1
 
 # reclaim funds
 echo "Reclaim funds back to the vault ✅"
-cleos push action claim.pomelo reclaim '[101, grant1]' -p claim.pomelo
+cleos push action claim.pomelo cancel '[101, grant1]' -p claim.pomelo
