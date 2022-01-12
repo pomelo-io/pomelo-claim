@@ -42,7 +42,7 @@ $ ./scripts/test.sh
 
 #### all claims for `round_id`
 
-```json
+```curl
 curl -X 'POST' \
   "https://eos.eosn.io/v1/chain/get_table_rows" \
   -H 'accept: application/json' \
@@ -58,7 +58,7 @@ curl -X 'POST' \
 
 #### by `grant_id`
 
-```json
+```curl
 curl -X 'POST' \
   "https://eos.eosn.io/v1/chain/get_table_rows" \
   -H 'accept: application/json' \
@@ -75,7 +75,7 @@ curl -X 'POST' \
 
 #### by `author_user_id` (EOSN account)
 
-```json
+```curl
 curl -X 'POST' \
   "https://eos.eosn.io/v1/chain/get_table_rows" \
   -H 'accept: application/json' \
@@ -94,7 +94,7 @@ curl -X 'POST' \
 
 #### by `funding_account` (EOS account)
 
-```json
+```curl
 curl -X 'POST' \
   "https://eos.eosn.io/v1/chain/get_table_rows" \
   -H 'accept: application/json' \
