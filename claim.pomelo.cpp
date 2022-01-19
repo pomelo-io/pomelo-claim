@@ -105,6 +105,7 @@ void claimpomelo::claim( const uint16_t round_id, const name grant_id )
         row.claimed_at = current_time_point();
         row.claimed = claim.claim;
         row.claim.quantity.amount = 0;
+        row.trx_id = get_trx_id();
     });
 
     // logging
@@ -121,7 +122,6 @@ void claimpomelo::cancel( const uint16_t round_id, const name grant_id )
     const auto& claim = _claims.get( grant_id.value, ERROR_GRANT_NOT_EXISTS );
     _claims.erase( claim );
 }
-
 
 [[eosio::action]]
 void claimpomelo::approve( const uint16_t round_id, const name grant_id, const bool approved )
@@ -177,4 +177,12 @@ void claimpomelo::clear_table( T& table, uint64_t rows_to_clear )
     while ( itr != table.end() && rows_to_clear-- ) {
         itr = table.erase( itr );
     }
+}
+
+checksum256 claimpomelo::get_trx_id()
+{
+    size_t size = transaction_size();
+    char buf[size];
+    size_t read = read_transaction( buf, size );
+    return sha256( buf, read );
 }

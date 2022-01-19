@@ -2,6 +2,7 @@
 
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
+#include <eosio/transaction.hpp>
 #include <eosio/singleton.hpp>
 
 using namespace eosio;
@@ -55,6 +56,7 @@ public:
      * - `{bool} approved` - approved claim
      * - `{extended_asset} claim` - claim amount
      * - `{extended_asset} claimed` - claimed amount
+     * - `{checksum256} trx_id` - transaction ID
      * - `{time_point_sec} claimed_at - claimed at timestamp
      * - `{time_point_sec} expires_at - claim expires at timestamp
      * - `{time_point_sec} created_at` - updated at timestamp
@@ -69,6 +71,7 @@ public:
      *      "approved": true,
      *      "claim": {"contract": "eosio.token", "quantity": "1000.0000 EOS"},
      *      "claimed": {"contract": "eosio.token", "quantity": "0.0000 EOS"},
+     *      "trx_id": "8e5ce72555af183b98a0180b2da507c16fd60f2831854129b289876ecc41b7e2",
      *      "claimed_at": "1970-01-01T00:00:00",
      *      "expires_at": "2022-12-06T00:00:00",
      *      "created_at": "2021-12-06T00:00:00"
@@ -82,6 +85,7 @@ public:
         bool                    approved;
         extended_asset          claim;
         extended_asset          claimed;
+        checksum256             trx_id;
         time_point_sec          claimed_at;
         time_point_sec          created_at;
         time_point_sec          expires_at;
@@ -215,6 +219,13 @@ public:
      */
     [[eosio::action]]
     void claimlog( const uint16_t round_id, const name grant_id, const name funding_account, const name author_user_id, const extended_asset claimed );
+
+    // action wrappers
+    using setconfig_action = eosio::action_wrapper<"setconfig"_n, &claimpomelo::setconfig>;
+    using claim_action = eosio::action_wrapper<"claim"_n, &claimpomelo::claim>;
+    using cancel_action = eosio::action_wrapper<"cancel"_n, &claimpomelo::cancel>;
+    using setclaim_action = eosio::action_wrapper<"setclaim"_n, &claimpomelo::setclaim>;
+    using approve_action = eosio::action_wrapper<"approve"_n, &claimpomelo::approve>;
     using claimlog_action = eosio::action_wrapper<"claimlog"_n, &claimpomelo::claimlog>;
 
 private:
@@ -227,5 +238,6 @@ private:
 
     template <typename T>
     void clear_table( T& table, uint64_t rows_to_clear );
+    checksum256 get_trx_id();
 
 };

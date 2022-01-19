@@ -2,7 +2,7 @@
 ---
 spec_version: "0.2.0"
 title: claim
-summary: Claim Pomelo funds
+summary: Claim {{grant_id}} Grant from {{round_id}} Round, rewards are sent to registered funding account.
 icon: https://avatars.githubusercontent.com/u/83723501#b74cf8b3d884f42fffea4bfe7070b3871e1845805c57973a48324af1228ad9cc
 ---
 
