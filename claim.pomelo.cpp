@@ -110,7 +110,7 @@ void claimpomelo::claim( const uint16_t round_id, const name grant_id )
 
     // logging
     claimlog_action claim_log( get_self(), { get_self(), "active"_n });
-    claim_log.send( round_id, grant_id, claim.funding_account, claim.author_user_id, claim.claim );
+    claim_log.send( round_id, grant_id, claim.funding_account, claim.author_user_id, claim.claimed );
 }
 
 [[eosio::action]]
