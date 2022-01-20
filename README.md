@@ -159,8 +159,8 @@ curl -X 'POST' \
 - `{bool} approved` - approved claim
 - `{extended_asset} claim` - claim amount
 - `{extended_asset} claimed` - claimed amount
-- `{time_point_sec} claimed_at - claimed at timestamp
-- `{time_point_sec} expires_at - claim expires at timestamp
+- `{time_point_sec} claimed_at` - claimed at timestamp
+- `{time_point_sec} expires_at` - claim expires at timestamp
 - `{time_point_sec} created_at` - updated at timestamp
 
 ### example
