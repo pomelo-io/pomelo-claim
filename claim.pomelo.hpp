@@ -129,15 +129,19 @@ public:
      *
      * - `{uint16_t} round_id` - round ID
      * - `{name} grant_id` - grant ID to claim funds
+     * - `{bool} [staked=false]` - (optional) to receive matching prize as staked (delegated to CPU)
      *
      * ### example
      *
      * ```bash
-     * $ cleos push action claim.pomelo claim '[101, "grant1"]' -p myaccount
+     * $ cleos push action claim.pomelo claim '[101, "grant1", null]' -p myaccount
+     *
+     * // receive as staked
+     * $ cleos push action claim.pomelo claim '[101, "grant1", true]' -p myaccount
      * ```
      */
     [[eosio::action]]
-    void claim( const uint16_t round_id, const name grant_id );
+    void claim( const uint16_t round_id, const name grant_id, const optional<bool> staked );
 
     /**
      * ## ACTION `cancel`

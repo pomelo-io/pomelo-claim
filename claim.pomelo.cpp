@@ -1,4 +1,5 @@
 #include <eosio.token/eosio.token.hpp>
+#include <eosio.system/eosio.system.hpp>
 #include <sx.utils/utils.hpp>
 #include <pomelo.app/app.pomelo.hpp>
 #include <eosn.login/login.eosn.hpp>
@@ -78,7 +79,7 @@ void claimpomelo::setclaim( const uint16_t round_id, const name grant_id, const 
 }
 
 [[eosio::action]]
-void claimpomelo::claim( const uint16_t round_id, const name grant_id )
+void claimpomelo::claim( const uint16_t round_id, const name grant_id, const optional<bool> staked )
 {
     // ** authority check is later
     check_status();
@@ -98,7 +99,17 @@ void claimpomelo::claim( const uint16_t round_id, const name grant_id )
     check_kyc( claim.author_user_id );
 
     // transfer matching prize to funding account
-    transfer( claim.funding_account, claim.claim, "🍈 " + grant_id.to_string() + " matching prize received via Pomelo.io" );
+
+    // 1. receive matching prize as staked
+    const symbol EOS = symbol{"EOS", 4};
+    if ( staked && claim.claim.quantity.symbol == EOS ) {
+        eosiosystem::system_contract::delegatebw_action delegatebw( "eosio"_n, { get_self(), "active"_n });
+        delegatebw.send( get_self(), claim.funding_account, asset{0, EOS}, claim.claim.quantity, true );
+
+    // 2. receive matching as liquid
+    } else {
+        transfer( claim.funding_account, claim.claim, "🍈 " + grant_id.to_string() + " matching prize received via Pomelo.io" );
+    }
 
     // update claim status
     _claims.modify( claim, get_self(), [&]( auto& row ) {
