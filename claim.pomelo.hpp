@@ -134,14 +134,14 @@ public:
      * ### example
      *
      * ```bash
-     * $ cleos push action claim.pomelo claim '[101, "grant1", null]' -p myaccount
+     * $ cleos push action claim.pomelo claim '[101, "grant1", false]' -p myaccount
      *
      * // receive as staked
      * $ cleos push action claim.pomelo claim '[101, "grant1", true]' -p myaccount
      * ```
      */
     [[eosio::action]]
-    void claim( const uint16_t round_id, const name grant_id, const optional<bool> staked );
+    void claim( const uint16_t round_id, const name grant_id, const bool staked );
 
     /**
      * ## ACTION `cancel`

@@ -79,7 +79,7 @@ void claimpomelo::setclaim( const uint16_t round_id, const name grant_id, const 
 }
 
 [[eosio::action]]
-void claimpomelo::claim( const uint16_t round_id, const name grant_id, const optional<bool> staked )
+void claimpomelo::claim( const uint16_t round_id, const name grant_id, const bool staked )
 {
     // ** authority check is later
     check_status();

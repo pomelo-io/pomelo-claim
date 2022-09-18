@@ -189,12 +189,12 @@ Claim allocated funds
 
 - `{uint16_t} round_id` - round ID
 - `{name} grant_id` - grant ID to claim funds
-- `{bool} [staked=false]` - (optional) to receive matching prize as staked (delegated to CPU)
+- `{bool} [staked=false]` - to receive matching prize as staked (delegated to CPU)
 
 ### example
 
 ```bash
-$ cleos push action claim.pomelo claim '[101, "grant1", null]' -p myaccount
+$ cleos push action claim.pomelo claim '[101, "grant1", false]' -p myaccount
 
 // receive as staked
 $ cleos push action claim.pomelo claim '[101, "grant1", true]' -p myaccount
