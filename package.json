@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@wharfkit/session": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.19"
+  }
+}
