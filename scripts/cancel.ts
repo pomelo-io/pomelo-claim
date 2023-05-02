@@ -18,15 +18,14 @@ const round_id = path.parse(filename).name;
 const walletPlugin = new WalletPluginPrivateKey({privateKey})
 const permissionLevel = {actor: "claim.pomelo", permission: "setclaim"}
 
-function setclaim(grant_id: string, claim: string ): AnyAction {
+function cancel(grant_id: string): AnyAction {
   return {
       account: "claim.pomelo",
-      name: "setclaim",
+      name: "cancel",
       authorization: [permissionLevel],
       data: {
           round_id,
-          grant_id,
-          claim: {contract: "eosio.token", quantity: claim}
+          grant_id
       }
   };
 };
@@ -38,14 +37,14 @@ const session = new Session({
 });
 
 (async () => {
-  for ( const [grant_it, quantity] of JSON.parse(fs.readFileSync(filename, "utf8")) ) {
+  for ( const [grant_it] of JSON.parse(fs.readFileSync(filename, "utf8")) ) {
     try {
-      const action = setclaim(grant_it, quantity);
+      const action = cancel(grant_it);
       await session.transact({action});
-      console.log("OK", grant_it, quantity)
+      console.log("OK", grant_it)
     } catch (e: any) {
       const message = e.error.details[0].message;
-      console.error("ERROR", grant_it, quantity, message)
+      console.error("ERROR", grant_it, message)
     }
   }
 })();
