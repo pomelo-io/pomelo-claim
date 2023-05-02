@@ -1,5 +1,6 @@
 import { Session, WalletPluginPrivateKey, AnyAction } from "@wharfkit/session"
 import fs from 'fs';
+import path from "path";
 
 const filename = process.argv[2];
 const privateKey = process.argv[3];
@@ -13,6 +14,7 @@ if (!fs.existsSync(filename)) {
   process.exit(1)
 }
 
+const round_id = path.parse(filename).name;
 const walletPlugin = new WalletPluginPrivateKey({privateKey})
 const permissionLevel = {actor: "claim.pomelo", permission: "setclaim"}
 
@@ -22,7 +24,7 @@ function setclaim(grant_id: string, claim: string ): AnyAction {
       name: "setclaim",
       authorization: [permissionLevel],
       data: {
-          round_id: 401,
+          round_id,
           grant_id,
           claim: {contract: "eosio.token", quantity: claim}
       }
@@ -41,8 +43,8 @@ const session = new Session({
       const action = setclaim(grant_it, quantity);
       await session.transact({action});
       console.log("OK", grant_it, quantity)
-    } catch (e) {
-      console.error("ERROR", grant_it, quantity)
+    } catch (e: any) {
+      console.error("ERROR", grant_it, quantity, e.error.details[0].message)
     }
   }
 })();
