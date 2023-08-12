@@ -20,7 +20,7 @@ const walletPlugin = new WalletPluginPrivateKey(privateKey)
 const permissionLevel = {actor: "claim.pomelo", permission: "setclaim"}
 
 function setclaim(grant_id: string, claim: string ): AnyAction {
-  const symbol = Asset.from(claim).symbol.toString();
+  const symbol = Asset.from(claim).symbol.code.toString();
   const contract = symbol === "TLOS" ? "ibc.wt.tlos" : "eosio.token";
   return {
       account: "claim.pomelo",
