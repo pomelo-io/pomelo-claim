@@ -25,17 +25,10 @@ cleos push action claim.pomelo approve '[101, "grant1", true]' -p claim.pomelo
 cleos push action claim.pomelo cancel '[101, "grant1"]' -p claim.pomelo
 ```
 
-## Testing
+## Build
 
 ```bash
-# build contracts
-$ ./scripts/build.sh
-
-# restart node, create EOSIO users, deploy contracts, issue tokens
-$ ./scripts/restart
-
-# run basic tests
-$ ./scripts/test.sh
+$ cdt-cpp claim.pomelo.cpp -I include
 ```
 
 ## HTTP requests

@@ -64,8 +64,8 @@ void claimpomelo::setclaim( const uint16_t round_id, const name grant_id, const 
     // check if token is valid
     check( is_account( claim.contract ), "claim.pomelo::setclaim: [claim] token contract does not exists");
     const symbol sym = claim.quantity.symbol;
-    const asset supply = token::get_supply(claim.contract, sym.code() );
-    check( supply.symbol == sym, "claim.pomelo::setclaim: [claim] has invalid supply symbol");
+    const asset balance = token::get_balance(claim.contract, get_self(), sym.code() );
+    check( balance.symbol == sym, "claim.pomelo::setclaim: [claim] has invalid balance symbol");
 
     _claims.emplace( get_self(), [&]( auto& row ) {
         row.funding_account = grant.funding_account;

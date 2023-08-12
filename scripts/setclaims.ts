@@ -48,8 +48,7 @@ const session = new Session({
   try {
     await session.transact({actions});
     console.log("OK")
-  } catch (e: any) {
-    const message = e.error.details[0].message;
-    console.error("ERROR", message)
+  } catch (error) {
+    console.error("ERROR", error)
   }
 })();
