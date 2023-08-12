@@ -1,4 +1,5 @@
-import { Session, WalletPluginPrivateKey, AnyAction } from "@wharfkit/session"
+import { Session, AnyAction, Asset } from "@wharfkit/session"
+import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey"
 import fs from 'fs';
 import path from "path";
 
@@ -15,10 +16,12 @@ if (!fs.existsSync(filename)) {
 }
 
 const round_id = path.parse(filename).name;
-const walletPlugin = new WalletPluginPrivateKey({privateKey})
+const walletPlugin = new WalletPluginPrivateKey(privateKey)
 const permissionLevel = {actor: "claim.pomelo", permission: "setclaim"}
 
 function setclaim(grant_id: string, claim: string ): AnyAction {
+  const symbol = Asset.from(claim).symbol.toString();
+  const contract = symbol === "TLOS" ? "ibc.wt.tlos" : "eosio.token";
   return {
       account: "claim.pomelo",
       name: "setclaim",
@@ -26,7 +29,7 @@ function setclaim(grant_id: string, claim: string ): AnyAction {
       data: {
           round_id,
           grant_id,
-          claim: {contract: "eosio.token", quantity: claim}
+          claim: {contract, quantity: claim}
       }
   };
 };
@@ -38,14 +41,15 @@ const session = new Session({
 });
 
 (async () => {
+  const actions: AnyAction[] = [];
   for ( const [grant_it, quantity] of JSON.parse(fs.readFileSync(filename, "utf8")) ) {
-    try {
-      const action = setclaim(grant_it, quantity);
-      await session.transact({action});
-      console.log("OK", grant_it, quantity)
-    } catch (e: any) {
-      const message = e.error.details[0].message;
-      console.error("ERROR", grant_it, quantity, message)
-    }
+    actions.push(setclaim(grant_it, quantity));
+  }
+  try {
+    await session.transact({actions});
+    console.log("OK")
+  } catch (e: any) {
+    const message = e.error.details[0].message;
+    console.error("ERROR", message)
   }
 })();

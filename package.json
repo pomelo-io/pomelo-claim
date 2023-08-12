@@ -1,8 +1,9 @@
 {
   "dependencies": {
-    "@wharfkit/session": "^0.2.0"
+    "@wharfkit/session": "1",
+    "@wharfkit/wallet-plugin-privatekey": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^18.11.19"
+    "@types/node": "*"
   }
 }

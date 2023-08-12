@@ -1,4 +1,5 @@
-import { Session, WalletPluginPrivateKey, AnyAction } from "@wharfkit/session"
+import { Session, AnyAction } from "@wharfkit/session"
+import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey"
 import fs from 'fs';
 import path from "path";
 
@@ -15,7 +16,7 @@ if (!fs.existsSync(filename)) {
 }
 
 const round_id = path.parse(filename).name;
-const walletPlugin = new WalletPluginPrivateKey({privateKey})
+const walletPlugin = new WalletPluginPrivateKey(privateKey)
 const permissionLevel = {actor: "claim.pomelo", permission: "setclaim"}
 
 function approve(grant_id: string): AnyAction {
@@ -38,14 +39,15 @@ const session = new Session({
 });
 
 (async () => {
+  const actions: AnyAction[] = [];
   for ( const [grant_it] of JSON.parse(fs.readFileSync(filename, "utf8")) ) {
-    try {
-      const action = approve(grant_it);
-      await session.transact({action});
-      console.log("OK", grant_it)
-    } catch (e: any) {
-      const message = e.error.details[0].message;
-      console.error("ERROR", grant_it, message)
-    }
+    actions.push(approve(grant_it));
+  }
+  try {
+    await session.transact({actions});
+    console.log("OK")
+  } catch (e: any) {
+    const message = e.error.details[0].message;
+    console.error("ERROR", message)
   }
 })();
