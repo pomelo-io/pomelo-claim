@@ -14,12 +14,55 @@ static const string ERROR_NO_BALANCE = "claim.pomelo::transfer: not enough balan
 static const string ERROR_AUTHORITY_BY = "claim.pomelo::claim: invalid claiming account (claim must be authorized by [funding_account] or [author_user_id] )";
 static const string ERROR_ALREADY_CLAIMED = "claim.pomelo::claim: grant has already claimed";
 static const char* ERROR_GRANT_NOT_EXISTS = "claim.pomelo::claim: [grant_id] does not exists";
+static const char* ERROR_FUNDING_ACCOUNT_NOT_EXISTS = "claim.pomelo::claim: [funding_account] does not exists";
 static const char* ERROR_KYC_NOT_FOUND = "claim.pomelo::check_kyc: [author_user_id] not found";
 static const string ERROR_KYC_REQUIRED = "claim.pomelo::check_kyc: grant [author_user_id] needs to first pass KYC";
 
 // variables
 static const name KYC_PROVIDER = "shufti"_n;
 static const uint32_t CLAIM_PERIOD_DAYS = 90;
+
+[[eosio::action]]
+void claimpomelo::updatefinal( const vector<uint16_t> round_ids )
+{
+    require_auth( get_self() );
+
+    claims_final_table _claims_final( get_self(), get_self().value );
+
+    // copy over claims from each round
+    for ( const auto& round_id : round_ids ) {
+        claims_table _claims( get_self(), round_id );
+        for ( const auto& claim : _claims ) {
+            if ( claim.claim.quantity.amount == 0 ) {
+                continue;
+            }
+            auto itr = _claims_final.find( claim.funding_account.value );
+            if ( itr == _claims_final.end() ) {
+                _claims_final.emplace( get_self(), [&]( auto& row ) {
+                    row.funding_account = claim.funding_account;
+                    row.claim = claim.claim;
+                });
+            } else {
+                _claims_final.modify( itr, get_self(), [&]( auto& row ) {
+                    row.claim += claim.claim;
+                });
+            }
+        }
+    }
+    // delete all claims
+    for ( const auto& round_id : round_ids ) {
+        claims_table _claims( get_self(), round_id );
+        clear_table( _claims, 5000 );
+    }
+    // clear final tables with 0 balance
+    for ( auto itr = _claims_final.begin(); itr != _claims_final.end(); ) {
+        if ( itr->claim.quantity.amount == 0 ) {
+            itr = _claims_final.erase( itr );
+        } else {
+            itr++;
+        }
+    }
+}
 
 [[eosio::action]]
 void claimpomelo::setconfig( const optional<config_row> config )
@@ -79,50 +122,63 @@ void claimpomelo::setclaim( const uint16_t round_id, const name grant_id, const 
 }
 
 [[eosio::action]]
-void claimpomelo::claim( const uint16_t round_id, const name grant_id, const bool staked )
+void claimpomelo::claim( const name funding_account )
 {
-    // ** authority check is later
-    check_status();
+    claims_final_table _claims_final( get_self(), get_self().value );
+    const auto& itr = _claims_final.get( funding_account.value, ERROR_FUNDING_ACCOUNT_NOT_EXISTS );
 
-    claims_table _claims( get_self(), round_id );
-    const auto& claim = _claims.get( grant_id.value, ERROR_GRANT_NOT_EXISTS );
+    // claim
+    transfer( funding_account, itr.claim, "🍈 Pomelo Grant" );
 
-    // validate claim
-    // ==============
-    // authority by [author or funding or self]
-    if ( !has_auth(claim.funding_account) && !has_auth(claim.author_user_id) && !has_auth(get_self()) ) {
-        check( false, ERROR_AUTHORITY_BY );
-    }
-    check( claim.claimed_at.sec_since_epoch() == 0, ERROR_ALREADY_CLAIMED );
-    check( claim.claim.quantity.amount != 0, ERROR_ALREADY_CLAIMED );
-    check( claim.approved, ERROR_REQUIRE_APPROVE );
-    check_kyc( claim.author_user_id );
-
-    // transfer matching prize to funding account
-
-    // 1. receive matching prize as staked
-    const symbol EOS = symbol{"EOS", 4};
-    if ( staked && claim.claim.quantity.symbol == EOS ) {
-        eosiosystem::system_contract::delegatebw_action delegatebw( "eosio"_n, { get_self(), "active"_n });
-        delegatebw.send( get_self(), claim.funding_account, asset{0, EOS}, claim.claim.quantity, true );
-
-    // 2. receive matching as liquid
-    } else {
-        transfer( claim.funding_account, claim.claim, "🍈 " + grant_id.to_string() + " matching prize received via Pomelo.io" );
-    }
-
-    // update claim status
-    _claims.modify( claim, get_self(), [&]( auto& row ) {
-        row.claimed_at = current_time_point();
-        row.claimed = claim.claim;
-        row.claim.quantity.amount = 0;
-        row.trx_id = get_trx_id();
-    });
-
-    // logging
-    claimlog_action claim_log( get_self(), { get_self(), "active"_n });
-    claim_log.send( round_id, grant_id, claim.funding_account, claim.author_user_id, claim.claimed );
+    // delete row
+    _claims_final.erase( itr );
 }
+
+// [[eosio::action]]
+// void claimpomelo::claim( const uint16_t round_id, const name grant_id, const bool staked )
+// {
+//     // ** authority check is later
+//     check_status();
+
+//     claims_table _claims( get_self(), round_id );
+//     const auto& claim = _claims.get( grant_id.value, ERROR_GRANT_NOT_EXISTS );
+
+//     // validate claim
+//     // ==============
+//     // authority by [author or funding or self]
+//     if ( !has_auth(claim.funding_account) && !has_auth(claim.author_user_id) && !has_auth(get_self()) ) {
+//         check( false, ERROR_AUTHORITY_BY );
+//     }
+//     check( claim.claimed_at.sec_since_epoch() == 0, ERROR_ALREADY_CLAIMED );
+//     check( claim.claim.quantity.amount != 0, ERROR_ALREADY_CLAIMED );
+//     check( claim.approved, ERROR_REQUIRE_APPROVE );
+//     check_kyc( claim.author_user_id );
+
+//     // transfer matching prize to funding account
+
+//     // 1. receive matching prize as staked
+//     const symbol EOS = symbol{"EOS", 4};
+//     if ( staked && claim.claim.quantity.symbol == EOS ) {
+//         eosiosystem::system_contract::delegatebw_action delegatebw( "eosio"_n, { get_self(), "active"_n });
+//         delegatebw.send( get_self(), claim.funding_account, asset{0, EOS}, claim.claim.quantity, true );
+
+//     // 2. receive matching as liquid
+//     } else {
+//         transfer( claim.funding_account, claim.claim, "🍈 " + grant_id.to_string() + " matching prize received via Pomelo.io" );
+//     }
+
+//     // update claim status
+//     _claims.modify( claim, get_self(), [&]( auto& row ) {
+//         row.claimed_at = current_time_point();
+//         row.claimed = claim.claim;
+//         row.claim.quantity.amount = 0;
+//         row.trx_id = get_trx_id();
+//     });
+
+//     // logging
+//     claimlog_action claim_log( get_self(), { get_self(), "active"_n });
+//     claim_log.send( round_id, grant_id, claim.funding_account, claim.author_user_id, claim.claimed );
+// }
 
 [[eosio::action]]
 void claimpomelo::cancel( const uint16_t round_id, const name grant_id )

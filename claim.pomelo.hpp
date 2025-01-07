@@ -99,6 +99,14 @@ public:
         indexed_by< "byfunding"_n, const_mem_fun<claims_row, uint64_t, &claims_row::by_funding_account> >
     > claims_table;
 
+    struct [[eosio::table("claims.final")]] claims_final_row {
+        name                    funding_account;
+        extended_asset          claim;
+
+        uint64_t primary_key() const { return funding_account.value; };
+    };
+    typedef eosio::multi_index< "claims.final"_n, claims_final_row> claims_final_table;
+
     /**
      * ## ACTION `setconfig`
      *
@@ -140,8 +148,11 @@ public:
      * $ cleos push action claim.pomelo claim '[101, "grant1", true]' -p myaccount
      * ```
      */
+    // [[eosio::action]]
+    // void claim( const uint16_t round_id, const name grant_id, const bool staked );
+
     [[eosio::action]]
-    void claim( const uint16_t round_id, const name grant_id, const bool staked );
+    void claim( const name funding_account );
 
     /**
      * ## ACTION `cancel`
@@ -223,6 +234,9 @@ public:
      */
     [[eosio::action]]
     void claimlog( const uint16_t round_id, const name grant_id, const name funding_account, const name author_user_id, const extended_asset claimed );
+
+    [[eosio::action]]
+    void updatefinal( const vector<uint16_t> round_ids );
 
     // action wrappers
     using setconfig_action = eosio::action_wrapper<"setconfig"_n, &claimpomelo::setconfig>;
